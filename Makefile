@@ -3,10 +3,17 @@ CFLAGS=-Wall
 LFLAGS=-L. -l:model-0.1.so
 PY=python3
 
-.PHONY: default all clean
+.PHONY: default all clean format
+
+PY_FILES := $(wildcard *.py)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+%.py:
+	black $@
+
+format: $(PY_FILES)
 
 model.so:
 	$(PY) harness.py
