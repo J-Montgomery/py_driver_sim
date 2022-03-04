@@ -3,9 +3,9 @@
 
 
 int main(int argv, char **argc) {
-    printf("Hello, World!");
+    printf("Hello, World!\n");
 
-    printf("Result: %x\n", call_stub(0, 1));
+    printf("Result: %x\n", call_stub(3, 5));
 
     return 0;
 }
