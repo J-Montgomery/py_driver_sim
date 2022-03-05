@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=-Wall
 LFLAGS=-L. -l:model-0.1.so
+KERNEL_INC_DIR=/usr/src/linux-oem-5.10-headers-5.10.0-1057/include/
 PY=python3
 
 .PHONY: default all clean format
@@ -8,7 +9,7 @@ PY=python3
 PY_FILES := $(wildcard *.py)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -I $(PWD)/headers -I $(KERNEL_INC_DIR) -o $@
 
 %.py:
 	black $@
