@@ -5,7 +5,7 @@
 #include <linux/stringify.h>
 /* INCLUDE_END */
 
-/* MACRO_BEGIN */
+/* MACRO_FUNC_BEGIN */
 #define MODULE_LICENSE(_license)
 #define MODULE_AUTHOR(_author)
 #define MODULE_DESCRIPTION(_desc)
@@ -23,4 +23,4 @@ extern const typeof(__devname) __mod_##__devtype##__##__devname##_device_table  
 			initialize_device_table(__stringify(type), __stringify(__devname), entry.name, entry.driver_data); \
 		} \
 	}
-/* MACRO_END */
+/* MACRO_FUNC_END */

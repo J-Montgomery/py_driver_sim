@@ -1,9 +1,9 @@
 #pragma once
 
-/* MACRO_BEGIN */
+/* MACRO_VALUE_BEGIN */
 #define SPI_NAME_SIZE	32
 #define SPI_MODULE_PREFIX "spi:"
-/* MACRO_END */
+/* MACRO_VALUE_END */
 
 /* STRUCT_BEGIN */
 struct spi_device_id {

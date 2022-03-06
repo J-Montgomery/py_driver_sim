@@ -5,10 +5,10 @@
 #include <linux/mod_devicetable.h>
 /* INCLUDE_END */
 
-/* MACRO_BEGIN */
+/* MACRO_FUNC_BEGIN */
 #define module_spi_driver(__spi_driver) \
 	module_driver(__spi_driver, spi_register_driver, spi_unregister_driver)
-/* MACRO_END */
+/* MACRO_FUNC_END */
 
 /* STRUCT_BEGIN */
 struct spi_controller {
