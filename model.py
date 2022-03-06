@@ -3,8 +3,10 @@ from model import ffi, lib
 
 from inspect import getmembers
 
+
 def get_string(cdata):
-    return ffi.string(cdata).decode('ascii')
+    return ffi.string(cdata).decode("ascii")
+
 
 def cdata_dict(cd):
     if isinstance(cd, ffi.CData):
@@ -18,12 +20,14 @@ def cdata_dict(cd):
     else:
         return cd
 
+
 device_table = dict()
 
 driver_table = dict()
 
+
 def find_device_table(entry):
-    name = entry['name'].decode('ascii')
+    name = entry["name"].decode("ascii")
     for driver in device_table:
         devices = device_table[driver]
         for dev in devices:
@@ -31,22 +35,26 @@ def find_device_table(entry):
                 print("found!", entry, dev, driver)
                 return driver
 
+
 @ffi.def_extern()
 def call_stub(x, y):
     print("stub({0}, {1})".format(x, y))
     return x + y
 
+
 @ffi.def_extern()
 def spi_register_driver(sdrv):
     driver = cdata_dict(sdrv[0])
-    print("register_driver", sdrv, driver['id_table'])
-    drv = find_device_table(driver['id_table'])
+    print("register_driver", sdrv, driver["id_table"])
+    drv = find_device_table(driver["id_table"])
     driver_table[drv] = sdrv
     return 0
+
 
 @ffi.def_extern()
 def spi_unregister_driver(sdrv):
     print("unregister_driver", sdrv)
+
 
 @ffi.def_extern()
 def initialize_device_table(type, name, dev_name, dev_id):

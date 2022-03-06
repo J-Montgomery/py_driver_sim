@@ -1,6 +1,7 @@
 import os
 import re
 
+
 class Matcher:
     def __init__(self):
         # This regex captures everything between two non-capturing groups
@@ -40,10 +41,12 @@ class Matcher:
         m = self.prototype_matcher.findall(text)
         return m
 
+
 def get_files(directory):
-    for dirpath,_,filenames in os.walk(directory):
+    for dirpath, _, filenames in os.walk(directory):
         for f in filenames:
             yield os.path.join(dirpath, f)
+
 
 def parse_headers(path):
     print("\n\n\n-------------------------------------------")
@@ -61,6 +64,8 @@ def parse_headers(path):
             macro_funcs = "\n".join(matcher.get_macro_funcs(data))
             structs = "\n".join(matcher.get_structs(data))
             prototypes = "\n".join(matcher.get_prototypes(data))
-            print(f"Includes:\n{str(includes)}\nmacro_vals:\n{macro_vals}\nmacro_funcs:\n{macro_funcs}\nstructs:\n{structs}\nprototypes:\n{prototypes}\n")
+            print(
+                f"Includes:\n{str(includes)}\nmacro_vals:\n{macro_vals}\nmacro_funcs:\n{macro_funcs}\nstructs:\n{structs}\nprototypes:\n{prototypes}\n"
+            )
 
     print("-------------------------------------------\n\n\n")
