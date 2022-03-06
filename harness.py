@@ -1,5 +1,5 @@
 import cffi
-import os
+import parse_headers
 
 ffibuilder = cffi.FFI()
 
@@ -8,14 +8,12 @@ header_list = ["headers/known_functions.h"]
 
 source = []
 
-def get_files(directory):
-    for dirpath,_,filenames in os.walk(directory):
-        for f in filenames:
-            yield os.path.join(dirpath, f)
-
 # Add all of our fake kernel header files
 #header_list.extend(list(get_files("headers")))
 #print(header_list)
+
+parse_headers.parse_headers("headers")
+
 
 for file in header_list:
     with open(file) as f:
@@ -23,7 +21,7 @@ for file in header_list:
         source.append(code + "\n")
 
 code = "".join(source)
-ffibuilder.embedding_api(code)
+ffibuilder.embedding_api(code) ## needs prototypes
 
 # Need to fix this, this is gross
 ffibuilder.set_source(
@@ -68,7 +66,7 @@ int call_probe(struct spi_driver *sdrv) {
     return sdrv->probe(0);
 }
 """,
-)
+) ## needs macros, structs, enums, declarations
 
 ffibuilder.cdef(r"""
 #define SPI_NAME_SIZE	32
@@ -106,7 +104,7 @@ struct spi_driver {
 };
 
 int call_probe(struct spi_driver *sdrv);
-""")
+""") # needs macros, variables, structs, enums, prototypes
 
 source = []
 
