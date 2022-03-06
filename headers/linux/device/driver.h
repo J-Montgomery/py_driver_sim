@@ -1,5 +1,6 @@
 #pragma once
 
+/* MACRO_BEGIN */
 #define module_driver(__driver, __register, __unregister, ...) \
 static int __attribute__((constructor)) __driver##_init(void) \
 { \
@@ -12,6 +13,9 @@ static void __attribute__((destructor)) __driver##_exit(void) \
 } \
 module_exit(__driver##_exit);
 
+/* MACRO_END */
+/* STRUCT_BEGIN */
 struct device_driver {
 	const char		*name;
 };
+/* STRUCT_END */
