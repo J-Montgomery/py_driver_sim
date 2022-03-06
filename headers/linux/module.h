@@ -1,24 +1,23 @@
 #pragma once
 
+#include <known_functions.h>
 #include <linux/stringify.h>
 #include <stdio.h>
-
-extern void initialize_device_table(char *driver_name, char *device_name, int device_id);
 
 #define MODULE_LICENSE(_license)
 #define MODULE_AUTHOR(_author)
 #define MODULE_DESCRIPTION(_desc)
 
-#define MODULE_DEVICE_TABLE(type, name) \
-extern const typeof(name) __mod_##type##__##name##_device_table   __attribute__ ((unused, alias(__stringify(name)))); \
-void __attribute__((constructor)) construct_##name(void) { \
-    size_t len = sizeof(typeof(name)) / sizeof(typeof(name[0])); \
-    void *ptr = (void *)name; \
-    for(size_t i = 0; i < len; i++) { \
-        typeof(name[0]) entry = *(typeof(name[0]) *)(ptr + sizeof(typeof(name[0])) * i); \
-        printf("dev: %p %s %s %lu\n", ptr + sizeof(typeof(name[0])) * i, __stringify(name), entry.dev, entry.driver_data); \
-    } \
-}
+#define module_init(init)
+#define module_exit(exit)
 
-
-// initialize_device_table(__stringify(name), entry.dev, entry.driver_data);
+#define MODULE_DEVICE_TABLE(__devtype, __devname) \
+extern const typeof(__devname) __mod_##__devtype##__##__devname##_device_table   __attribute__ ((unused, alias(__stringify(__devname)))); \
+	void __attribute__((constructor)) construct_##__devname(void) { \
+		size_t len = sizeof(typeof(__devname)) / sizeof(typeof(__devname[0])); \
+		void *ptr = (void *)__devname; \
+		for(size_t i = 0; i < (len - 1); i++) { \
+			typeof(__devname[0]) entry = *(typeof(__devname[0]) *)(ptr + sizeof(typeof(__devname[0])) * i); \
+			initialize_device_table(__stringify(type), __stringify(__devname), entry.name, entry.driver_data); \
+		} \
+	}

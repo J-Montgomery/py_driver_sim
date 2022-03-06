@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall
-LFLAGS=-L. -l:model-0.1.so
+LFLAGS=-L. -l:model.so
 KERNEL_INC_DIR=/usr/src/linux-oem-5.10-headers-5.10.0-1057/include/
 PY=python3
 

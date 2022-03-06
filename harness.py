@@ -1,17 +1,72 @@
+from email import header
 import cffi
+import os
 
 ffibuilder = cffi.FFI()
 
 module_list = ["model.py", "model2.py"]
+header_list = ["headers/known_functions.h", "lib.h"]
 
-with open("lib.h") as f:
-    data = "".join([line for line in f if not line.startswith("#")])
-    ffibuilder.embedding_api(data)
+source = []
+
+def get_files(directory):
+    for dirpath,_,filenames in os.walk(directory):
+        for f in filenames:
+            yield os.path.join(dirpath, f)
+
+# Add all of our fake kernel header files
+#header_list.extend(list(get_files("headers")))
+#print(header_list)
+
+for file in header_list:
+    with open(file) as f:
+        code = "".join([line for line in f if not line.startswith("#")])
+        source.append(code + "\n")
+
+code = "".join(source)
+ffibuilder.embedding_api(code)
 
 ffibuilder.set_source(
     "model",
     r"""
     #include "lib.h"
+
+#define SPI_NAME_SIZE	32
+#define SPI_MODULE_PREFIX "spi:"
+
+struct device {
+	struct device	*parent;
+	const char	*init_name;
+};
+
+struct device_driver {
+	const char		*name;
+};
+
+struct spi_device_id {
+char name[SPI_NAME_SIZE];
+unsigned long driver_data;
+};
+
+    struct spi_controller {
+	struct device	dev;
+};
+
+struct spi_device {
+	struct device		dev;
+	struct spi_controller	*controller;
+	struct spi_controller	*master;	/* compatibility layer */
+};
+
+struct spi_driver {
+	const struct spi_device_id *id_table;
+	int			(*probe)(struct spi_device *spi);
+	int			(*remove)(struct spi_device *spi);
+	void			(*shutdown)(struct spi_device *spi);
+	struct device_driver	driver;
+};
+
+
 """,
 )
 source = []
@@ -24,7 +79,6 @@ for file in module_list:
 code = "".join(source)
 ffibuilder.embedding_init_code(code)
 
-version = "0.1"
-target_name = "model-{version}.*".format(version=version)
+target_name = "model.*"
 
 ffibuilder.compile(target=target_name, verbose=True)
