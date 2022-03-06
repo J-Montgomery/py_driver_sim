@@ -3,8 +3,8 @@ import os
 
 ffibuilder = cffi.FFI()
 
-module_list = ["model.py", "model2.py"]
-header_list = ["headers/known_functions.h", "lib.h"]
+module_list = ["model.py"]
+header_list = ["headers/known_functions.h"]
 
 source = []
 
@@ -29,8 +29,6 @@ ffibuilder.embedding_api(code)
 ffibuilder.set_source(
     "model",
     r"""
-    #include "lib.h"
-
     #define SPI_NAME_SIZE	32
 #define SPI_MODULE_PREFIX "spi:"
 

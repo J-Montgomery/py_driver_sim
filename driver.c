@@ -4,44 +4,31 @@
 #include "lib.h"
 
 void print_buf(char *buffer, size_t len) {
-    for (size_t i=0; i<len; i++) {
-        printf("%02x [%c] ", buffer[i], buffer[i]);
-        if ((i+1)%16 == 0) printf("\n");
-    }
+	for (size_t i=0; i<len; i++) {
+		printf("%02x [%c] ", buffer[i], buffer[i]);
+		if ((i+1)%16 == 0) printf("\n");
+	}
 }
 
 int max31722_do_stuff(void) {
-    printf("Hello, World!\n");
+	printf("Hello, World!\n");
 
-    printf("Result: %i\n", call_stub(3, 5));
-    printf("Result2: %i\n", call_stub2(3, 5));
+	printf("Result: %i\n", call_stub(3, 5));
 
-    return 0;
-}
+	return 0;
+	}
 
 static int max31722_probe(struct spi_device *spi)
 {
-    printf("probing\n");
-    max31722_do_stuff();
+	printf("probing\n");
+	max31722_do_stuff();
 	return 0;
 }
 
 static int max31722_remove(struct spi_device *spi)
 {
-    printf("removing\n");
+	printf("removing\n");
 	return 0;
-}
-
-static int max31722_suspend(struct device *dev)
-{
-    printf("suspending\n");
-	return 0;
-}
-
-static int max31722_resume(struct device *dev)
-{
-	printf("resuming\n");
-    return 0;
 }
 
 static const struct spi_device_id max31722_spi_id[] = {
