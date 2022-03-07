@@ -1,0 +1,10 @@
+{
+    "headers_dir": "headers/",
+    "models_dir": "models/",
+    "driver_dir": "driver/",
+    "internal_dir": "internal/",
+
+    "model_utilities": [
+        "models/utility.py"
+    ]
+}

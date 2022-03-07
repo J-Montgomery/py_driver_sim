@@ -4,7 +4,7 @@ LFLAGS=-L. -l:model.so
 KERNEL_INC_DIR=/usr/src/linux-oem-5.10-headers-5.10.0-1057/include/
 PY=python3
 
-.PHONY: default all clean format
+.PHONY: default all clean format test
 
 PY_FILES := $(wildcard *.py)
 

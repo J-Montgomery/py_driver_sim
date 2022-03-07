@@ -71,6 +71,7 @@ def initialize_device_table(type, name, dev_name, dev_id):
 @ffi.def_extern()
 def main(argv, argc):
     print("Hello, World!")
+    #hello()
     if not len(driver_table):
         print("No drivers found")
     else:

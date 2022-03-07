@@ -14,6 +14,7 @@ class Matcher:
         self.struct_matcher = re.compile(base_regex.format("STRUCT"))
         self.enum_matcher = re.compile(base_regex.format("ENUM"))
         self.prototype_matcher = re.compile(base_regex.format("PROTOTYPE"))
+        self.code_matcher = re.compile(base_regex.format("CODE"))
 
     def get_includes(self, text):
         m = self.include_matcher.findall(text)
@@ -40,6 +41,10 @@ class Matcher:
 
     def get_prototypes(self, text):
         m = self.prototype_matcher.findall(text)
+        return m
+
+    def get_code(self, text):
+        m = self.code_matcher.findall(text)
         return m
 
 
@@ -78,11 +83,10 @@ def parse_includes(inc_list, filepath, rootpath):
         if referred is not None:
             found_headers.append(referred)
 
-    print("found headers", found_headers)
     return found_headers
 
-def parse_headers(root):
-    print("\n\n\n-------------------------------------------")
+def parse(root):
+    print("\n-------------------------------------------")
 
     headers = [os.path.abspath(x) for x in get_files(root)]
 
@@ -90,11 +94,13 @@ def parse_headers(root):
     file_graph = nx.DiGraph()
 
     for file in headers:
-        print(f"Matching {file}")
+        print(f"Searching {file}")
         with open(file) as f:
             data = f.read()
             includes = "\n".join(matcher.get_includes(data))
             edges = parse_includes(includes.splitlines(), file, root)
+            if edges == []:
+                file_graph.add_node(file)
             for edge in edges:
                 file_graph.add_edge(edge, file)
                 if edge not in headers:
@@ -105,6 +111,7 @@ def parse_headers(root):
     macro_funcs = []
     structs = []
     prototypes = []
+    code = []
     for file in headers:
         with open(file) as f:
             data = f.read()
@@ -112,6 +119,6 @@ def parse_headers(root):
             macro_funcs.append("\n".join(matcher.get_macro_funcs(data)))
             structs.append("\n".join(matcher.get_structs(data)))
             prototypes.append("\n".join(matcher.get_prototypes(data)))
-    print(macro_vals, macro_funcs, structs, prototypes)
-    print("-------------------------------------------\n\n\n")
-    return (macro_vals, macro_funcs, structs, prototypes)
+            code.append("\n".join(matcher.get_code(data)))
+    print("-------------------------------------------\n")
+    return (macro_vals, macro_funcs, structs, prototypes, code)
