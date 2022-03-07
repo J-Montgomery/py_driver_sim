@@ -1,6 +1,7 @@
+from dis import pretty_flags
 import os
 import re
-
+import networkx as nx
 
 class Matcher:
     def __init__(self):
@@ -47,25 +48,64 @@ def get_files(directory):
         for f in filenames:
             yield os.path.join(dirpath, f)
 
+def get_referred_path(is_local, path, filepath, rootpath):
+    search_paths = []
 
-def parse_headers(path):
+    if is_local:
+        dir = os.path.dirname(filepath)
+        search_paths.append(os.path.join(dir, path))
+    search_paths.append(os.path.join(rootpath, path))
+
+    for potential_path in search_paths:
+        fullpath = os.path.abspath(potential_path)
+        if os.path.exists(fullpath):
+            return fullpath
+    return None
+
+
+def parse_includes(inc_list, filepath, rootpath):
+    # Takes a list of lines containing includes
+    re_include = re.compile(r"(?:#\s*include\s*)([<|\"])(.+)([>|\"])")
+    found_headers = []
+    for line in inc_list:
+        referred = None
+        m = re_include.search(line)
+        if m:
+            if m.group(1) == "\"":
+                referred = get_referred_path(True, m.group(2), filepath, rootpath)
+            else:
+                referred = get_referred_path(False, m.group(2), filepath, rootpath)
+        if referred is not None:
+            found_headers.append(referred)
+
+    print("found headers", found_headers)
+    return found_headers
+
+def parse_headers(root):
     print("\n\n\n-------------------------------------------")
 
-    headers = list(get_files(path))
+    headers = [os.path.abspath(x) for x in get_files(root)]
+
     matcher = Matcher()
+    file_graph = nx.DiGraph()
 
     for file in headers:
         print(f"Matching {file}")
         with open(file) as f:
             data = f.read()
-            test = matcher.get_includes(data)
             includes = "\n".join(matcher.get_includes(data))
-            macro_vals = "\n".join(matcher.get_macro_vals(data))
-            macro_funcs = "\n".join(matcher.get_macro_funcs(data))
-            structs = "\n".join(matcher.get_structs(data))
-            prototypes = "\n".join(matcher.get_prototypes(data))
-            print(
-                f"Includes:\n{str(includes)}\nmacro_vals:\n{macro_vals}\nmacro_funcs:\n{macro_funcs}\nstructs:\n{structs}\nprototypes:\n{prototypes}\n"
-            )
+            edges = parse_includes(includes.splitlines(), file, root)
+            for edge in edges:
+                file_graph.add_edge(file, edge)
+                if edge not in headers:
+                    headers.append(edge)
+            # macro_vals = "\n".join(matcher.get_macro_vals(data))
+            # macro_funcs = "\n".join(matcher.get_macro_funcs(data))
+            # structs = "\n".join(matcher.get_structs(data))
+            # prototypes = "\n".join(matcher.get_prototypes(data))
+            # print(
+            #     f"Includes:\n{str(includes)}\nmacro_vals:\n{macro_vals}\nmacro_funcs:\n{macro_funcs}\nstructs:\n{structs}\nprototypes:\n{prototypes}\n"
+            # )
 
+    print(list(nx.topological_sort(file_graph)))
     print("-------------------------------------------\n\n\n")
