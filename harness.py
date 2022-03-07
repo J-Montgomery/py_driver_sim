@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import parse_code
+from dtlib import edtlib
 
 
 class Config:
