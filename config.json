@@ -4,6 +4,7 @@
     "driver_dir": "driver/",
     "internal_dir": "internal/",
     "lib_name": "model",
+    "devicetree": "test_setup.dts",
 
     "model_utilities": [
         "models/utility.py"

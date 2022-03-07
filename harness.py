@@ -47,6 +47,12 @@ class Config:
         else:
             return []
 
+    def get_devicetree(self):
+        if "devicetree" in self.config:
+            return self.config["devicetree"]
+        else:
+            return "test_setup.dts"
+
 
 def parse_config(filepath):
     config = None
@@ -74,7 +80,17 @@ def main():
 
     config = Config("config.json")
 
-    source = []
+    edt = edtlib.EDT(config.get_devicetree(), '')
+
+    # Get the DT nodes that declare a compatible string
+    device_nodes = edt.compat2nodes
+    for compat in device_nodes:
+        if "pysim" in compat:
+            print("Pysim: {}".format(compat))
+        else:
+            print("device: {}".format(compat))
+    print(edt.compat2nodes)
+
     (macro_vals, _, structs, prototypes, _) = parse_code.parse(config.get_headers_dir())
     (_, _, _, internal_prototypes, internal_code) = parse_code.parse(
         config.get_internal_dir()
@@ -100,7 +116,6 @@ def main():
     target_name = config.get_lib_name() + ".*"
 
     ffibuilder.compile(target=target_name, verbose=True)
-
 
 if __name__ == "__main__":
     main()
