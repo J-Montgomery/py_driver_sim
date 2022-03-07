@@ -3,6 +3,7 @@ import os
 import re
 import networkx as nx
 
+
 class Matcher:
     def __init__(self):
         # This regex captures everything between two non-capturing groups
@@ -53,6 +54,7 @@ def get_files(directory):
         for f in filenames:
             yield os.path.join(dirpath, f)
 
+
 def get_referred_path(is_local, path, filepath, rootpath):
     search_paths = []
 
@@ -76,7 +78,7 @@ def parse_includes(inc_list, filepath, rootpath):
         referred = None
         m = re_include.search(line)
         if m:
-            if m.group(1) == "\"":
+            if m.group(1) == '"':
                 referred = get_referred_path(True, m.group(2), filepath, rootpath)
             else:
                 referred = get_referred_path(False, m.group(2), filepath, rootpath)
@@ -84,6 +86,7 @@ def parse_includes(inc_list, filepath, rootpath):
             found_headers.append(referred)
 
     return found_headers
+
 
 def parse(root):
     print("\n-------------------------------------------")

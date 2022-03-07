@@ -3,6 +3,7 @@
     "models_dir": "models/",
     "driver_dir": "driver/",
     "internal_dir": "internal/",
+    "lib_name": "model",
 
     "model_utilities": [
         "models/utility.py"
