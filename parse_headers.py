@@ -96,16 +96,22 @@ def parse_headers(root):
             includes = "\n".join(matcher.get_includes(data))
             edges = parse_includes(includes.splitlines(), file, root)
             for edge in edges:
-                file_graph.add_edge(file, edge)
+                file_graph.add_edge(edge, file)
                 if edge not in headers:
                     headers.append(edge)
-            # macro_vals = "\n".join(matcher.get_macro_vals(data))
-            # macro_funcs = "\n".join(matcher.get_macro_funcs(data))
-            # structs = "\n".join(matcher.get_structs(data))
-            # prototypes = "\n".join(matcher.get_prototypes(data))
-            # print(
-            #     f"Includes:\n{str(includes)}\nmacro_vals:\n{macro_vals}\nmacro_funcs:\n{macro_funcs}\nstructs:\n{structs}\nprototypes:\n{prototypes}\n"
-            # )
 
-    print(list(nx.topological_sort(file_graph)))
+    headers = list(nx.topological_sort(file_graph))
+    macro_vals = []
+    macro_funcs = []
+    structs = []
+    prototypes = []
+    for file in headers:
+        with open(file) as f:
+            data = f.read()
+            macro_vals.append("\n".join(matcher.get_macro_vals(data)))
+            macro_funcs.append("\n".join(matcher.get_macro_funcs(data)))
+            structs.append("\n".join(matcher.get_structs(data)))
+            prototypes.append("\n".join(matcher.get_prototypes(data)))
+    print(macro_vals, macro_funcs, structs, prototypes)
     print("-------------------------------------------\n\n\n")
+    return (macro_vals, macro_funcs, structs, prototypes)

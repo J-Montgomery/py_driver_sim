@@ -2,8 +2,11 @@
 
 /* MACRO_VALUE_BEGIN */
 #define SPI_NAME_SIZE	32
-#define SPI_MODULE_PREFIX "spi:"
 /* MACRO_VALUE_END */
+
+/* MACRO_FUNC_BEGIN */
+#define SPI_MODULE_PREFIX "spi:"
+/* MACRO_FUNC_END */
 
 /* STRUCT_BEGIN */
 struct spi_device_id {
