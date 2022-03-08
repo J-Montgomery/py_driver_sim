@@ -82,8 +82,8 @@ try:
 except ImportError:
     from yaml import Loader     # type: ignore
 
-from dtlib.dtlib import DT, DTError, to_num, to_nums, Type
-from dtlib.grutils import Graph
+from dtlib import DT, DTError, to_num, to_nums, Type
+from grutils import Graph
 
 
 #

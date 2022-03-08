@@ -1,7 +1,9 @@
 from model import ffi, lib
-
-
+import sys
 from inspect import getmembers
+
+ResourceLoader(RESOURCE_STRING)
+from edtlib import EDT
 
 
 def get_string(cdata):
@@ -67,11 +69,22 @@ def initialize_device_table(type, name, dev_name, dev_id):
     print("Init device table ({} : {}".format(key, dev_entry))
     print(device_table)
 
+def parse_dt(path):
+    edt = EDT(path, '')
+
+    # Get the DT nodes that declare a compatible string
+    device_nodes = edt.compat2nodes
+    for compat in device_nodes:
+        if "pysim" in compat:
+            print("Pysim: {}".format(compat))
+        else:
+            print("device: {}".format(compat))
+    print(edt.compat2nodes)
 
 @ffi.def_extern()
 def main(argv, argc):
-    print("Hello, World!")
-    #hello()
+    parse_dt("test_setup.dts")
+
     if not len(driver_table):
         print("No drivers found")
     else:

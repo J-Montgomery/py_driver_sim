@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 import parse_code
-from dtlib import edtlib
+from resource_bundler import Bundler
 
 
 class Config:
@@ -41,17 +41,23 @@ class Config:
         else:
             return "model"
 
+    def get_devicetree(self):
+        if "devicetree" in self.config:
+            return self.config["devicetree"]
+        else:
+            return "test_setup.dts"
+
     def get_model_utilities(self):
         if "model_utilities" in self.config:
             return self.config["model_utilities"]
         else:
             return []
 
-    def get_devicetree(self):
-        if "devicetree" in self.config:
-            return self.config["devicetree"]
+    def get_bundled_utilities(self):
+        if "bundled_utilities" in self.config:
+            return self.config["bundled_utilities"]
         else:
-            return "test_setup.dts"
+            return []
 
 
 def parse_config(filepath):
@@ -61,11 +67,13 @@ def parse_config(filepath):
     print(config["source_dir"])
 
 
-def get_py_init(imports):
+def get_py_init(imports, misc_code):
     lines = ["import sys;\n"]
-    body = 'sys.path.insert(0, "{}")\n'
+    body = 'sys.path.insert(0, \"{}\")\n'
     for file in imports:
         lines.append(body.format(file))
+    for stmt in misc_code:
+        lines.append('{}\n'.format(stmt))
     return "".join(lines)
 
 
@@ -80,16 +88,17 @@ def main():
 
     config = Config("config.json")
 
-    edt = edtlib.EDT(config.get_devicetree(), '')
 
-    # Get the DT nodes that declare a compatible string
-    device_nodes = edt.compat2nodes
-    for compat in device_nodes:
-        if "pysim" in compat:
-            print("Pysim: {}".format(compat))
-        else:
-            print("device: {}".format(compat))
-    print(edt.compat2nodes)
+    # edt = edtlib.EDT(config.get_devicetree(), '')
+
+    # # Get the DT nodes that declare a compatible string
+    # device_nodes = edt.compat2nodes
+    # for compat in device_nodes:
+    #     if "pysim" in compat:
+    #         print("Pysim: {}".format(compat))
+    #     else:
+    #         print("device: {}".format(compat))
+    # print(edt.compat2nodes)
 
     (macro_vals, _, structs, prototypes, _) = parse_code.parse(config.get_headers_dir())
     (_, _, _, internal_prototypes, internal_code) = parse_code.parse(
@@ -110,7 +119,10 @@ def main():
             code = f.read()
             source.append(code + "\n")
 
-    init = get_py_init(config.get_model_utilities())
+    bundler = Bundler(config.get_bundled_utilities())
+
+    init_misc = "RESOURCE_STRING = \'{0}\'".format(bundler.bundle())
+    init = get_py_init(config.get_model_utilities(), [init_misc])
     ffibuilder.embedding_init_code(init.join(source))
 
     target_name = config.get_lib_name() + ".*"

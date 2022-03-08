@@ -8,5 +8,12 @@
 
     "model_utilities": [
         "models/utility.py"
+    ],
+
+    "bundled_utilities": [
+        "dtlib/__init__.py",
+        "dtlib/dtlib.py",
+        "dtlib/grutils.py",
+        "dtlib/edtlib.py"
     ]
 }
