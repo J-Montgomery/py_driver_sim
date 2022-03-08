@@ -1,6 +1,7 @@
 from model import ffi, lib
 import sys
-from inspect import getmembers
+
+#from models.utility import device_class
 
 ResourceLoader(RESOURCE_STRING)
 from edtlib import EDT
@@ -10,21 +11,7 @@ def get_string(cdata):
     return ffi.string(cdata).decode("ascii")
 
 
-def cdata_dict(cd):
-    if isinstance(cd, ffi.CData):
-        try:
-            return ffi.string(cd)
-        except TypeError:
-            try:
-                return [cdata_dict(x) for x in cd]
-            except TypeError:
-                return {k: cdata_dict(v) for k, v in getmembers(cd)}
-    else:
-        return cd
-
-
 device_table = dict()
-
 driver_table = dict()
 
 
@@ -34,7 +21,7 @@ def find_device_table(entry):
         devices = device_table[driver]
         for dev in devices:
             if name in dev:
-                print("found!", entry, dev, driver)
+                #print("found!", entry, dev, driver)
                 return driver
 
 
@@ -47,7 +34,7 @@ def call_stub(x, y):
 @ffi.def_extern()
 def spi_register_driver(sdrv):
     driver = cdata_dict(sdrv[0])
-    print("register_driver", sdrv, driver["id_table"])
+    #print("register_driver", sdrv, driver["id_table"])
     drv = find_device_table(driver["id_table"])
     driver_table[drv] = sdrv
     return 0
@@ -66,8 +53,8 @@ def initialize_device_table(type, name, dev_name, dev_id):
         device_table[key].append(dev_entry)
     else:
         device_table[key] = [dev_entry]
-    print("Init device table ({} : {}".format(key, dev_entry))
-    print(device_table)
+    #print("Init device table ({} : {}".format(key, dev_entry))
+    #print(device_table)
 
 def parse_dt(path):
     edt = EDT(path, '')
@@ -79,17 +66,35 @@ def parse_dt(path):
             print("Pysim: {}".format(compat))
         else:
             print("device: {}".format(compat))
-    print(edt.compat2nodes)
+    #print(edt.compat2nodes)
+    return edt.compat2nodes
+
+class GenericSpiDevice(DeviceClass):
+    @register_probe('pysim,generic-device')
+    def spi_dev_init(foo):
+        print("generic spidev probe")
 
 @ffi.def_extern()
 def main(argv, argc):
-    parse_dt("test_setup.dts")
+    dt_nodes = parse_dt("test_setup.dts")
 
+    # Initialize our simulated devices
+    p = DeviceClass()
+    p.get_subclasses()
+    #print(_dev_id_registry)
+
+    p.build_id_table()
+
+    # traverse the device-tree and initialize our simulated devices
+    for id in dt_nodes:
+        p.call_sim_probe(id)
+
+    print("Starting execution\n----------------------------------------")
     if not len(driver_table):
         print("No drivers found")
     else:
         drivers = [driver_table[x] for x in driver_table]
-        print("driver ", drivers)
+        #print("driver ", drivers)
         # attempt to probe the first driver
         lib.call_probe(drivers[0])
     return 0

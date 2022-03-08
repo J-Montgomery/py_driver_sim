@@ -6,6 +6,8 @@ import json
 import sys
 import importlib.abc, importlib.util
 
+from inspect import getmembers, isclass
+
 class ResourceLoader(importlib.abc.SourceLoader):
     def __init__(self, resource_string):
         self.resources = json.loads(self._unpack(resource_string))
@@ -35,3 +37,58 @@ class ResourceLoader(importlib.abc.SourceLoader):
 
     def get_filename(self, name):
         return name
+
+def cdata_dict(cd):
+    if isinstance(cd, ffi.CData):
+        try:
+            return ffi.string(cd)
+        except TypeError:
+            try:
+                return [cdata_dict(x) for x in cd]
+            except TypeError:
+                return {k: cdata_dict(v) for k, v in getmembers(cd)}
+    else:
+        return cd
+
+_dev_id_registry = {}
+def register_probe(*device_ids):
+    def wrapper(func):
+        func._probe = True
+        _dev_id_registry[func.__name__] = device_ids
+        return func
+    return wrapper
+
+def _search_ids(name):
+    return _dev_id_registry[name]
+
+class DeviceClass:
+    subclasses = []
+    id_table = dict()
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._propdict = {'device': True}
+        cls.subclasses.append(cls)
+
+    def get_subclasses(self):
+        print("subclasses:")
+        print("\t{}".format(self.subclasses))
+
+    def build_id_table(self):
+        print(self.subclasses, len(self.subclasses))
+        for cls in self.subclasses:
+            functions = [(name, func) for name, func in getmembers(cls)
+                        if callable(func) and type(func) is not type]
+            methods = [(_search_ids(name), f) for (name, f) in functions if hasattr(f, '_probe')]
+            self.id_table[cls] = methods
+            print("device_id: ", self.id_table)
+
+    def call_sim_probe(self, dev_id):
+        print("probing for:", dev_id)
+        for device in self.id_table:
+            probes = self.id_table[device]
+            for sim_probe in probes:
+                if dev_id in sim_probe[0]:
+                    print("found!", dev_id)
+                    sim_probe[1](dev_id)
+        return [] # Couldn't find a simulated device

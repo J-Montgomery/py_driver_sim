@@ -113,7 +113,11 @@ def main():
 
     # Concat all the python models together
     source = []
-    model_list = [x for x in Path(config.get_models_dir()).rglob("*.py")]
+
+    # Ensure that utilities get loaded first
+    model_list = [Path(x) for x in config.get_model_utilities()]
+    model_list.extend([x for x in Path(config.get_models_dir()).rglob("*.py") if x not in model_list])
+
     for file in model_list:
         with open(file) as f:
             code = f.read()
@@ -122,7 +126,7 @@ def main():
     bundler = Bundler(config.get_bundled_utilities())
 
     init_misc = "RESOURCE_STRING = \'{0}\'".format(bundler.bundle())
-    init = get_py_init(config.get_model_utilities(), [init_misc])
+    init = get_py_init([], [init_misc])
     ffibuilder.embedding_init_code(init.join(source))
 
     target_name = config.get_lib_name() + ".*"

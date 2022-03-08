@@ -7,7 +7,8 @@
     "devicetree": "test_setup.dts",
 
     "model_utilities": [
-        "models/utility.py"
+        "models/utility.py",
+        "models/core.py"
     ],
 
     "bundled_utilities": [
