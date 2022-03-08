@@ -1,6 +1,6 @@
 /* CODE_BEGIN */
-int call_probe(struct spi_driver *sdrv)
+int spi_call_probe(struct spi_driver *sdrv, struct spi_device *spi)
 {
-	return sdrv->probe(0);
+	return sdrv->probe(spi);
 }
 /* CODE_END */

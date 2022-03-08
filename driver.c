@@ -1,8 +1,12 @@
 #include <stdio.h>
+#include <linux/kernel.h>
 #include <linux/spi/spi.h>
 #include <linux/module.h>
 #include "lib.h"
 
+struct device_data {
+	struct spi_device *spi_device;
+};
 
 int device_do_stuff(void) {
 	printf("Hello, World!\n");
@@ -14,7 +18,18 @@ int device_do_stuff(void) {
 
 static int device_probe(struct spi_device *spi)
 {
-	printf("probing\n");
+	int ret;
+	struct device_data *data;
+
+	printf("probing %p\n", spi);
+
+	data = devm_kzalloc(&spi->dev, sizeof(*data), GFP_KERNEL);
+	if (!data)
+		return -ENOMEM;
+
+	spi_set_drvdata(spi, data);
+	data->spi_device = spi;
+
 	device_do_stuff();
 	return 0;
 }

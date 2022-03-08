@@ -28,5 +28,16 @@ struct spi_driver {
 	void			(*shutdown)(struct spi_device *spi);
 	struct device_driver	driver;
 };
-
 /* STRUCT_END */
+
+/* CODE_BEGIN */
+static inline void spi_set_drvdata(struct spi_device *spi, void *data)
+{
+	dev_set_drvdata(&spi->dev, data);
+}
+
+static inline void *spi_get_drvdata(struct spi_device *spi)
+{
+	return dev_get_drvdata(&spi->dev);
+}
+/* CODE_END */

@@ -69,13 +69,9 @@ def parse_dt(path):
     #print(edt.compat2nodes)
     return edt.compat2nodes
 
-class GenericSpiDevice(DeviceClass):
-    @register_probe('pysim,generic-device')
-    def spi_dev_init(foo):
-        print("generic spidev probe")
-
 @ffi.def_extern()
 def main(argv, argc):
+    global_mem_pool = []
     dt_nodes = parse_dt("test_setup.dts")
 
     # Initialize our simulated devices
@@ -96,5 +92,7 @@ def main(argv, argc):
         drivers = [driver_table[x] for x in driver_table]
         #print("driver ", drivers)
         # attempt to probe the first driver
-        lib.call_probe(drivers[0])
+        mem = ffi.new("struct spi_device *")
+        global_mem_pool.append(mem)
+        lib.spi_call_probe(drivers[0], mem)
     return 0
