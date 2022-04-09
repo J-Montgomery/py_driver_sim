@@ -27,6 +27,8 @@ the runtime.
 
 Add the python code to the folder specified by the `models_dir` property in `config.json`. It will be automatically
 picked up and concatenated with the rest of the code when the project is rebuilt.
+
+Use the following 
 # Make rules
 
 `make all` builds the driver

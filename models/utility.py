@@ -58,8 +58,13 @@ def register_probe(*device_ids):
         return func
     return wrapper
 
-def _search_ids(name):
-    return _dev_id_registry[name]
+_subsystem_registry = {}
+def subsystem_init(*args):
+    def wrapper(func):
+        func._subsystem = True
+        _subsystem_registry[func.__name__] = args
+        return func
+    return wrapper
 
 class DeviceClass:
     subclasses = []
@@ -79,7 +84,7 @@ class DeviceClass:
         for cls in self.subclasses:
             functions = [(name, func) for name, func in getmembers(cls)
                         if callable(func) and type(func) is not type]
-            methods = [(_search_ids(name), f) for (name, f) in functions if hasattr(f, '_probe')]
+            methods = [(_dev_id_registry[name], f) for (name, f) in functions if hasattr(f, '_probe')]
             self.id_table[cls] = methods
             print("device_id: ", self.id_table)
 

@@ -17,11 +17,12 @@ driver_table = dict()
 
 def find_device_table(entry):
     name = entry["name"].decode("ascii")
+    print(device_table)
     for driver in device_table:
         devices = device_table[driver]
         for dev in devices:
             if name in dev:
-                #print("found!", entry, dev, driver)
+                print("found!", entry, dev, driver)
                 return driver
 
 
@@ -30,15 +31,13 @@ def call_stub(x, y):
     print("stub({0}, {1})".format(x, y))
     return x + y
 
-
 @ffi.def_extern()
 def spi_register_driver(sdrv):
     driver = cdata_dict(sdrv[0])
-    #print("register_driver", sdrv, driver["id_table"])
+    print("register_driver", sdrv, driver["id_table"])
     drv = find_device_table(driver["id_table"])
     driver_table[drv] = sdrv
     return 0
-
 
 @ffi.def_extern()
 def spi_unregister_driver(sdrv):
@@ -53,8 +52,8 @@ def initialize_device_table(type, name, dev_name, dev_id):
         device_table[key].append(dev_entry)
     else:
         device_table[key] = [dev_entry]
-    #print("Init device table ({} : {}".format(key, dev_entry))
-    #print(device_table)
+    print("Init device table ({} : {}".format(key, dev_entry))
+    print(device_table)
 
 def parse_dt(path):
     edt = EDT(path, '')
