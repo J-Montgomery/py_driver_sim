@@ -1,14 +1,18 @@
-CC=gcc
-CFLAGS=-Wall
-LFLAGS=-L. -l:model.so
-KERNEL_INC_DIR=/usr/src/linux-oem-5.10-headers-5.10.0-1057/include/
-PY=python3
+KERNEL_INC_DIR ?= /usr/src/linux-oem-5.10-headers-5.10.0-1057/include/
+OUT_DIR ?= output
+CODE_DIR ?= system
+
+PY ?= python3
+CC ?= gcc
+CFLAGS +=-Wall
+LFLAGS=-L. -l:$(OUT_DIR)/model.so
 
 .PHONY: default all clean format test
 
 PY_FILES := $(wildcard *.py)
+DIRS=$(OUT_DIR)
 
-%.o: %.c
+$(OUT_DIR)/%.o: $(CODE_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -I $(PWD)/headers -I $(KERNEL_INC_DIR) -o $@
 
 %.py:
@@ -16,20 +20,21 @@ PY_FILES := $(wildcard *.py)
 
 format: $(PY_FILES)
 
-model.so:
-	$(PY) harness.py
+$(OUT_DIR)/model.so:
+	rm -rf $@
+	$(PY) harness.py $(OUT_DIR) model.so
 
-driver: driver.o model.so
-	$(CC) driver.o $(LFLAGS) -o $@
+$(OUT_DIR)/driver: $(OUT_DIR)/driver.o $(OUT_DIR)/model.so
+	$(CC) $< $(LFLAGS) -o $@
 
-default: driver
+default: $(OUT_DIR)/driver
 
-test:
-	LD_LIBRARY_PATH=. ./driver
+test: default
+	LD_LIBRARY_PATH=. ./$(OUT_DIR)/driver
 
 all: default
 
 clean:
-	rm -f *.o
-	rm -f *.so
-	rm -f driver
+	rm -rf $(OUT_DIR)
+
+$(shell mkdir -p $(DIRS))

@@ -1,6 +1,8 @@
+import argparse
 import cffi
 import json
 from pathlib import Path
+from shutil import move
 
 import parse_code
 from resource_bundler import Bundler
@@ -82,8 +84,24 @@ def concat_sources(src_list):
     list(map(source.extend, src_list))
     return "\n".join(source)
 
+def move_output(out_dir, target):
+    target_file = Path(target)
+    output_dir = Path(out_dir)
+    if not target_file.exists():
+        print("Target model does not exist")
+        return
+    elif not output_dir.exists():
+        print("Output Dir does not exist")
+        return
+    print(target, output_dir.resolve())
+    move(str(target_file.resolve()), str(output_dir.resolve()))
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('output_dir')
+    parser.add_argument('model_name')
+    args = parser.parse_args()
+
     ffibuilder = cffi.FFI()
 
     config = Config("config.json")
@@ -132,6 +150,8 @@ def main():
     target_name = config.get_lib_name() + ".*"
 
     ffibuilder.compile(target=target_name, verbose=True)
+
+    move_output(args.output_dir, args.model_name)
 
 if __name__ == "__main__":
     main()
