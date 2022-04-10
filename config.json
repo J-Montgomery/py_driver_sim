@@ -1,5 +1,5 @@
 {
-    "headers_dir": "headers/",
+    "headers_dir": "headers/freertos",
     "models_dir": "models/",
     "driver_dir": "driver/",
     "internal_dir": "internal/",

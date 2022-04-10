@@ -182,7 +182,7 @@ typedef enum
     ulTaskGenericNotifyValueClear( ( xTask ), ( uxIndexToClear ), ( ulBitsToClear ) )
 /* MACRO_FUNC_END */
 
-/* CODE_BEGIN */
+/* PROTOTYPE_BEGIN */
 BaseType_t xTaskCreate (TaskFunction_t pxTaskCode,const char * const pcName,const configSTACK_DEPTH_TYPE usStackDepth,void * const pvParameters,UBaseType_t uxPriority,TaskHandle_t * const pxCreatedTask);
 TaskHandle_t xTaskCreateStatic (TaskFunction_t pxTaskCode,const char * const pcName,const uint32_t ulStackDepth,void * const pvParameters,UBaseType_t uxPriority,StackType_t * const puxStackBuffer,StaticTask_t * const pxTaskBuffer);
 BaseType_t xTaskCreateRestricted (const TaskParameters_t * const pxTaskDefinition,TaskHandle_t * pxCreatedTask);
@@ -256,4 +256,4 @@ void vTaskStepTick (TickType_t xTicksToJump);
 eSleepModeStatus eTaskConfirmSleepModeStatus (void);
 TaskHandle_t pvTaskIncrementMutexHeldCount (void);
 void vTaskInternalSetTimeOutState (TimeOut_t * const pxTimeOut);
-/* CODE_END */
+/* PROTOTYPE_END */

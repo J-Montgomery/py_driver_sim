@@ -1,6 +1,10 @@
 #pragma once
 #define LIST_H
 
+/* INCLUDE_BEGIN */
+#include "FreeRTOS.h"
+/* INCLUDE_END */
+
 /* MACRO_FUNC_BEGIN */
 #ifndef configLIST_VOLATILE
     #define configLIST_VOLATILE
@@ -36,41 +40,6 @@
     #define listTEST_LIST_ITEM_INTEGRITY( pxItem )                      configASSERT( ( ( pxItem )->xListItemIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxItem )->xListItemIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
     #define listTEST_LIST_INTEGRITY( pxList )                           configASSERT( ( ( pxList )->xListIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxList )->xListIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
 #endif /* configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES */
-
-struct xLIST;
-struct xLIST_ITEM
-{
-    listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    configLIST_VOLATILE TickType_t xItemValue;          /*< The value being listed.  In most cases this is used to sort the list in ascending order. */
-    struct xLIST_ITEM * configLIST_VOLATILE pxNext;     /*< Pointer to the next ListItem_t in the list. */
-    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /*< Pointer to the previous ListItem_t in the list. */
-    void * pvOwner;                                     /*< Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
-    struct xLIST * configLIST_VOLATILE pxContainer;     /*< Pointer to the list in which this list item is placed (if any). */
-    listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-};
-typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
-
-#if ( configUSE_MINI_LIST_ITEM == 1 )
-    struct xMINI_LIST_ITEM
-    {
-        listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-        configLIST_VOLATILE TickType_t xItemValue;
-        struct xLIST_ITEM * configLIST_VOLATILE pxNext;
-        struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
-    };
-    typedef struct xMINI_LIST_ITEM MiniListItem_t;
-#else
-    typedef struct xLIST_ITEM      MiniListItem_t;
-#endif
-
-typedef struct xLIST
-{
-    listFIRST_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    volatile UBaseType_t uxNumberOfItems;
-    ListItem_t * configLIST_VOLATILE pxIndex; /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-    MiniListItem_t xListEnd;                  /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
-    listSECOND_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-} List_t;
 
 #define listSET_LIST_ITEM_OWNER( pxListItem, pxOwner )    ( ( pxListItem )->pvOwner = ( void * ) ( pxOwner ) )
 #define listGET_LIST_ITEM_OWNER( pxListItem )             ( ( pxListItem )->pvOwner )
@@ -143,7 +112,61 @@ typedef struct xLIST
 #define listLIST_IS_INITIALISED( pxList )                ( ( pxList )->xListEnd.xItemValue == portMAX_DELAY )
 /* MACRO_FUNC_END */
 
-/* CODE_BEGIN */
+/* STRUCT_BEGIN */
+struct xLIST;
+struct xLIST_ITEM
+{
+    listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    configLIST_VOLATILE TickType_t xItemValue;          /*< The value being listed.  In most cases this is used to sort the list in ascending order. */
+    struct xLIST_ITEM * configLIST_VOLATILE pxNext;     /*< Pointer to the next ListItem_t in the list. */
+    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /*< Pointer to the previous ListItem_t in the list. */
+    void * pvOwner;                                     /*< Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
+    struct xLIST * configLIST_VOLATILE pxContainer;     /*< Pointer to the list in which this list item is placed (if any). */
+    listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+};
+typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
+
+#if ( configUSE_MINI_LIST_ITEM == 1 )
+    struct xMINI_LIST_ITEM
+    {
+        listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+        configLIST_VOLATILE TickType_t xItemValue;
+        struct xLIST_ITEM * configLIST_VOLATILE pxNext;
+        struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
+    };
+    typedef struct xMINI_LIST_ITEM MiniListItem_t;
+#else
+    typedef struct xLIST_ITEM      MiniListItem_t;
+#endif
+
+typedef struct xLIST
+{
+    listFIRST_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    volatile UBaseType_t uxNumberOfItems;
+    ListItem_t * configLIST_VOLATILE pxIndex; /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
+    MiniListItem_t xListEnd;                  /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
+    listSECOND_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+} List_t;
+
+typedef struct HeapRegion
+{
+    uint8_t * pucStartAddress;
+    size_t xSizeInBytes;
+} HeapRegion_t;
+
+typedef struct xHeapStats
+{
+    size_t xAvailableHeapSpaceInBytes;      /* The total heap size currently available - this is the sum of all the free blocks, not the largest block that can be allocated. */
+    size_t xSizeOfLargestFreeBlockInBytes;  /* The maximum size, in bytes, of all the free blocks within the heap at the time vPortGetHeapStats() is called. */
+    size_t xSizeOfSmallestFreeBlockInBytes; /* The minimum size, in bytes, of all the free blocks within the heap at the time vPortGetHeapStats() is called. */
+    size_t xNumberOfFreeBlocks;             /* The number of free memory blocks within the heap at the time vPortGetHeapStats() is called. */
+    size_t xMinimumEverFreeBytesRemaining;  /* The minimum amount of total free memory (sum of all free blocks) there has been in the heap since the system booted. */
+    size_t xNumberOfSuccessfulAllocations;  /* The number of calls to pvPortMalloc() that have returned a valid memory block. */
+    size_t xNumberOfSuccessfulFrees;        /* The number of calls to vPortFree() that has successfully freed a block of memory. */
+} HeapStats_t;
+/* STRUCT_END */
+
+/* PROTOTYPE_BEGIN */
 void vListInitialise( List_t * const pxList ) PRIVILEGED_FUNCTION;
 void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
 void vListInsert( List_t * const pxList,
@@ -151,4 +174,32 @@ void vListInsert( List_t * const pxList,
 void vListInsertEnd( List_t * const pxList,
                      ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTION;
-/* CODE_END */
+
+void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) PRIVILEGED_FUNCTION;
+void vPortGetHeapStats( HeapStats_t * pxHeapStats );
+void * pvPortMalloc( size_t xSize ) PRIVILEGED_FUNCTION;
+void * pvPortCalloc( size_t xNum,
+                     size_t xSize ) PRIVILEGED_FUNCTION;
+void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
+void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
+size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
+size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
+
+#if ( configSTACK_ALLOCATION_FROM_SEPARATE_HEAP == 1 )
+    void * pvPortMallocStack( size_t xSize ) PRIVILEGED_FUNCTION;
+    void vPortFreeStack( void * pv ) PRIVILEGED_FUNCTION;
+#else
+    #define pvPortMallocStack    pvPortMalloc
+    #define vPortFreeStack       vPortFree
+#endif
+
+BaseType_t xPortStartScheduler( void ) PRIVILEGED_FUNCTION;
+void vPortEndScheduler( void ) PRIVILEGED_FUNCTION;
+#if ( portUSING_MPU_WRAPPERS == 1 )
+    struct xMEMORY_REGION;
+    void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
+                                    const struct xMEMORY_REGION * const xRegions,
+                                    StackType_t * pxBottomOfStack,
+                                    uint32_t ulStackDepth ) PRIVILEGED_FUNCTION;
+#endif
+/* PROTOTYPE_END */

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/system/system.h"
+//#include "freertos/system/system.h"
 
 void vHelloWorld(void *pvParams)
 {
@@ -20,7 +20,7 @@ void app_main()
 
 /*-----------------------------------------------------------*/
 extern void esp_vApplicationTickHook();
-void IRAM_ATTR vApplicationTickHook()
+void vApplicationTickHook()
 {
 	printf("tick\n");
 }

@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "FreeRTOSConfig.h"
+#include "projdefs.h"
 #include "portable.h"
 /* INCLUDE_END */
 
