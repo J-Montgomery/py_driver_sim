@@ -1,64 +1,73 @@
 #include <stdio.h>
-#include <linux/kernel.h>
-#include <linux/spi/spi.h>
-#include <linux/module.h>
-#include "lib.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/system/system.h"
 
-struct device_data {
-	struct spi_device *spi_device;
-};
-
-int device_do_stuff(void) {
-	printf("Hello, World!\n");
-
-	printf("Result: %i\n", call_stub(3, 5));
-
-	return 0;
+void vHelloWorld(void *pvParams)
+{
+	for (int i = 0; i < 10; i++) {
+		printf("HelloWorld! %d\n", i);
+		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
-
-static int device_probe(struct spi_device *spi)
-{
-	int ret;
-	struct device_data *data;
-
-	printf("probing %p\n", spi);
-
-	data = devm_kzalloc(&spi->dev, sizeof(*data), GFP_KERNEL);
-	if (!data)
-		return -ENOMEM;
-
-	spi_set_drvdata(spi, data);
-	data->spi_device = spi;
-
-	device_do_stuff();
-	return 0;
+	printf("Restart\n");
 }
 
-static int device_remove(struct spi_device *spi)
+void app_main()
 {
-	printf("removing\n");
-	return 0;
+	printf("Start\n");
+	xTaskCreate(vHelloWorld, "HelloWorld", configMINIMAL_STACK_SIZE * 2, NULL, tskIDLE_PRIORITY, NULL);
 }
 
-static const struct spi_device_id device_spi_id[] = {
-	{"vendor,devicev1", 1},
-	{"vendor,devicev2", 2},
-	{"vendor,devicev3", 3},
-	{}
-};
-MODULE_DEVICE_TABLE(spi, device_spi_id);
+/*-----------------------------------------------------------*/
+extern void esp_vApplicationTickHook();
+void IRAM_ATTR vApplicationTickHook()
+{
+	printf("tick\n");
+}
 
-static struct spi_driver device_driver = {
-	.driver = {
-		.name = "device",
-	},
-	.probe =            device_probe,
-	.remove =           device_remove,
-	.id_table =         device_spi_id,
-};
+extern void esp_vApplicationIdleHook();
+void vApplicationIdleHook()
+{
+	printf("Idling\n");
+}
 
-module_spi_driver(device_driver);
+void vApplicationDaemonTaskStartupHook()
+{
+	printf("Startup hook\n");
+}
 
-MODULE_AUTHOR("Foo Bar <foo@bar.com>");
-MODULE_DESCRIPTION("Generic SPI sensor driver");
-MODULE_LICENSE("GPL v2");
+/*-----------------------------------------------------------*/
+
+/* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
+ * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
+ * used by the Idle task. */
+void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
+				   StackType_t **ppxIdleTaskStackBuffer,
+				   uint32_t *pulIdleTaskStackSize)
+{
+	static StaticTask_t xIdleTaskTCB;
+	static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
+	*ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+	*ppxIdleTaskStackBuffer = uxIdleTaskStack;
+	*pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief This is to provide the memory that is used by the RTOS daemon/time task.
+ *
+ * If configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
+ * implementation of vApplicationGetTimerTaskMemory() to provide the memory that is
+ * used by the RTOS daemon/time task.
+ */
+void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
+					StackType_t **ppxTimerTaskStackBuffer,
+					uint32_t *pulTimerTaskStackSize)
+{
+	static StaticTask_t xTimerTaskTCB;
+	static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
+
+	*ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
+	*ppxTimerTaskStackBuffer = uxTimerTaskStack;
+	*pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+}
