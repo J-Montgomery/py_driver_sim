@@ -17,6 +17,7 @@
 #define configUSE_CO_ROUTINES 		0
 #define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 #define configUNIQUE_INTERRUPT_PRIORITIES ( 16 )
+#define configTOTAL_MPU_REGIONS         (8)
 
 #define configUSE_TIMERS                1
 #define configTIMER_TASK_PRIORITY       2

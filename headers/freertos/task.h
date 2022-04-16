@@ -2,10 +2,8 @@
 #define INC_TASK_H
 
 /* INCLUDE_BEGIN */
-#ifndef INC_FREERTOS_H
-    #error "include FreeRTOS.h must appear in source files before include task.h"
-#endif
-
+#include "portmacro.h"
+#include "projdefs.h"
 #include "list.h"
 /* INCLUDE_END */
 

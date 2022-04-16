@@ -941,9 +941,7 @@ typedef struct xSTATIC_LIST
 typedef struct xSTATIC_TCB
 {
     void * pxDummy1;
-    #if ( portUSING_MPU_WRAPPERS == 1 )
-        xMPU_SETTINGS xDummy2;
-    #endif
+	xMPU_SETTINGS xDummy2;
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;

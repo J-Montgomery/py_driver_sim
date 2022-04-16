@@ -15,6 +15,16 @@
 #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT    8
 
+#define portPRIVILEGED_FLASH_REGION                   ( 0UL )
+#define portUNPRIVILEGED_FLASH_REGION                 ( 1UL )
+#define portUNPRIVILEGED_SYSCALLS_REGION              ( 2UL )
+#define portPRIVILEGED_RAM_REGION                     ( 3UL )
+#define portSTACK_REGION                              ( 4UL )
+#define portFIRST_CONFIGURABLE_REGION                 ( 5UL )
+#define portLAST_CONFIGURABLE_REGION                  ( configTOTAL_MPU_REGIONS - 1UL )
+#define portNUM_CONFIGURABLE_REGIONS                  ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1 )
+#define portTOTAL_NUM_REGIONS                         ( portNUM_CONFIGURABLE_REGIONS + 1 )
+
 #define portEND_SWITCHING_ISR( xSwitchRequired ) \
 {                                                \
 extern uint32_t ulPortYieldRequired;         \
@@ -75,11 +85,24 @@ if( xSwitchRequired != pdFALSE )             \
 /* MACRO_FUNC_END */
 
 /* STRUCT_BEGIN */
-typedef portSTACK_TYPE   StackType_t;
+typedef uint32_t         StackType_t;
 typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
 typedef uint32_t         TickType_t;
+typedef size_t configSTACK_DEPTH_TYPE;
+
+typedef struct MPURegionSettings
+    {
+        uint32_t ulRBAR; /**< RBAR for the region. */
+        uint32_t ulRLAR; /**< RLAR for the region. */
+    } MPURegionSettings_t;
+
+    typedef struct MPU_SETTINGS
+    {
+        uint32_t ulMAIR0;                                              /**< MAIR0 for the task containing attributes for all the 4 per task regions. */
+        MPURegionSettings_t xRegionsSettings[ portTOTAL_NUM_REGIONS ]; /**< Settings for 4 per task regions. */
+    } xMPU_SETTINGS;
 /* STRUCT_END */
 
 /* PROTOTYPE_BEGIN */
