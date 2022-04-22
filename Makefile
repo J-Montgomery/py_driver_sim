@@ -11,7 +11,7 @@ INCLUDE_DIRS          += -I./headers
 INCLUDE_DIRS          += -I./headers/freertos
 
 CFLAGS   += -ggdb3 -fPIC -Wall
-LDFLAGS  += -ggdb3 -pthread -L. -L $(OUT_DIR) -l freertos
+LDFLAGS  += -ggdb3 -pthread -L $(OUT_DIR) -l freertos
 CPPFLAGS += $(INCLUDE_DIRS) -DBUILD_DIR=\"$(BUILD_DIR_ABS)\"
 CFLAGS +=-Wall
 LFLAGS=-L. -l:$(OUT_DIR)/freertos.so

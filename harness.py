@@ -71,11 +71,11 @@ def parse_config(filepath):
 
 def get_py_init(imports, misc_code):
     lines = ["import sys;\n"]
-    body = 'sys.path.insert(0, \"{}\")\n'
+    body = 'sys.path.insert(0, "{}")\n'
     for file in imports:
         lines.append(body.format(file))
     for stmt in misc_code:
-        lines.append('{}\n'.format(stmt))
+        lines.append("{}\n".format(stmt))
     return "".join(lines)
 
 
@@ -83,6 +83,7 @@ def concat_sources(src_list):
     source = []
     list(map(source.extend, src_list))
     return "\n".join(source)
+
 
 def move_output(out_dir, target):
     target_file = Path(target)
@@ -96,16 +97,16 @@ def move_output(out_dir, target):
     print(target, output_dir.resolve())
     move(str(target_file.resolve()), str(output_dir.resolve()))
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('output_dir')
-    parser.add_argument('model_name')
+    parser.add_argument("output_dir")
+    parser.add_argument("model_name")
     args = parser.parse_args()
 
     ffibuilder = cffi.FFI()
 
     config = Config("config.json")
-
 
     # edt = edtlib.EDT(config.get_devicetree(), '')
 
@@ -118,14 +119,17 @@ def main():
     #         print("device: {}".format(compat))
     # print(edt.compat2nodes)
 
-    (macro_vals, _, structs, prototypes, lib_code) = parse_code.parse(config.get_headers_dir())
+    (macro_vals, _, structs, prototypes, lib_code) = parse_code.parse(
+        config.get_headers_dir()
+    )
     (_, _, _, internal_prototypes, internal_code) = parse_code.parse(
         config.get_internal_dir()
     )
 
     ffibuilder.embedding_api(concat_sources([prototypes]))
     ffibuilder.set_source(
-        config.get_lib_name(), concat_sources([macro_vals, structs, lib_code, internal_code])
+        config.get_lib_name(),
+        concat_sources([macro_vals, structs, lib_code, internal_code]),
     )
     ffibuilder.cdef(concat_sources([macro_vals, structs, internal_prototypes]))
 
@@ -134,7 +138,9 @@ def main():
 
     # Ensure that utilities get loaded first
     model_list = [Path(x) for x in config.get_model_utilities()]
-    model_list.extend([x for x in Path(config.get_models_dir()).rglob("*.py") if x not in model_list])
+    model_list.extend(
+        [x for x in Path(config.get_models_dir()).rglob("*.py") if x not in model_list]
+    )
 
     for file in model_list:
         with open(file) as f:
@@ -143,7 +149,7 @@ def main():
 
     bundler = Bundler(config.get_bundled_utilities())
 
-    init_misc = "RESOURCE_STRING = \'{0}\'".format(bundler.bundle())
+    init_misc = "RESOURCE_STRING = '{0}'".format(bundler.bundle())
     init = get_py_init([], [init_misc])
     ffibuilder.embedding_init_code(init.join(source))
 
@@ -152,6 +158,7 @@ def main():
     ffibuilder.compile(target=target_name, verbose=True)
 
     move_output(args.output_dir, args.model_name)
+
 
 if __name__ == "__main__":
     main()
