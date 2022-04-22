@@ -1,10 +1,10 @@
-CC                    := gcc
-BIN                   := posix_demo
+CC                    ?= gcc
+BIN                   ?= freertos
 
-BUILD_DIR             := ./build
+BUILD_DIR             ?= ./build
 BUILD_DIR_ABS         := $(abspath $(BUILD_DIR))
 
-KERNEL_DIR            := $(PWD)
+KERNEL_DIR            ?= .
 
 INCLUDE_DIRS          := -I.
 INCLUDE_DIRS          += -I${KERNEL_DIR}/../headers/freertos
@@ -12,11 +12,15 @@ INCLUDE_DIRS          += -I${KERNEL_DIR}/../headers/freertos
 SOURCE_FILES          := $(wildcard *.c)
 SOURCE_FILES          += $(wildcard ${KERNEL_DIR}/port/*.c)
 
-CFLAGS                :=    -ggdb3
-LDFLAGS               :=    -ggdb3 -pthread
+# Ignore these because they'll be linked in later with the full system
+# SOURCE_FILES          += $(wildcard ${KERNEL_DIR}/../system/main*.c)
 
-  CFLAGS              +=   -O3
-  LDFLAGS             +=   -O3
+CFLAGS                :=    -ggdb3 -fPIC
+LDFLAGS               :=    -ggdb3 -pthread -shared
+CPPFLAGS              :=    $(INCLUDE_DIRS) -DBUILD_DIR=\"$(BUILD_DIR_ABS)\"
+
+CFLAG                 +=   -O3
+LDFLAGS               +=   -O3
 
 OBJ_FILES = $(SOURCE_FILES:%.c=$(BUILD_DIR)/%.o)
 

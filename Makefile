@@ -1,19 +1,23 @@
-KERNEL_INC_DIR ?= /usr/src/linux-oem-5.10-headers-5.10.0-1057/include/
-OUT_DIR ?= output
+KERNEL_INC_DIR ?= $(PWD)/headers/freertos
+OUT_DIR ?= $(abspath ./output)
 CODE_DIR ?= system
+OS_DIR ?= os
 
 PY ?= python3
 CC ?= gcc
 CFLAGS +=-Wall
-LFLAGS=-L. -l:$(OUT_DIR)/model.so
+LFLAGS=-L. -l:$(OUT_DIR)/model.so -l:$(OUT_DIR)/freertos.so
 
-.PHONY: default all clean format test
+.PHONY: default all clean format test os
 
 PY_FILES := $(wildcard *.py)
 DIRS=$(OUT_DIR)
 
 $(OUT_DIR)/%.o: $(CODE_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -I $(PWD)/headers -I $(KERNEL_INC_DIR) -o $@
+
+os:
+	$(MAKE) -C $(OS_DIR) CC=$(CC) BUILD_DIR=$(OUT_DIR) BIN=freertos.so
 
 %.py:
 	black $@

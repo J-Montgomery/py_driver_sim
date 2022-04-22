@@ -64,15 +64,23 @@
 #include "task.h"
 
 /* Local includes. */
-#include "console.h"
+//#include "console.h"
 
 #define    BLINKY_DEMO    0
 #define    FULL_DEMO      1
 
-#define BUILD         "./"
+#ifdef BUILD_DIR
+    #define BUILD         BUILD_DIR
+#else
+    #define BUILD         "./"
+#endif
 
 /* Demo type is passed as an argument */
-#define    mainSELECTED_APPLICATION     BLINKY_DEMO
+#ifdef USER_DEMO
+    #define     mainSELECTED_APPLICATION    USER_DEMO
+#else /* Default Setting */
+    #define    mainSELECTED_APPLICATION     BLINKY_DEMO
+#endif
 
 /* This demo uses heap_3.c (the libc provided malloc() and free()). */
 
@@ -139,33 +147,14 @@ int main( void )
     /* SIGINT is not blocked by the posix port */
     signal( SIGINT, handle_sigint );
 
-    /* Do not include trace code when performing a code coverage analysis. */
-    #if ( projCOVERAGE_TEST != 1 )
-        {
-            /* Initialise the trace recorder.  Use of the trace recorder is optional.
-             * See http://www.FreeRTOS.org/trace for more information. */
-            vTraceEnable( TRC_START );
-
-            /* Start the trace recording - the recording is written to a file if
-             * configASSERT() is called. */
-            printf( "\r\nTrace started.\r\nThe trace will be dumped to disk if a call to configASSERT() fails.\r\n" );
-
-            #if ( TRACE_ON_ENTER == 1 )
-                printf( "\r\nThe trace will be dumped to disk if Enter is hit.\r\n" );
-            #endif
-            uiTraceStart();
-        }
-    #endif /* if ( projCOVERAGE_TEST != 1 ) */
-
-    console_init();
     #if ( mainSELECTED_APPLICATION == BLINKY_DEMO )
         {
-            console_print( "Starting echo blinky demo\n" );
+            printf( "Starting echo blinky demo\n" );
             main_blinky();
         }
     #elif ( mainSELECTED_APPLICATION == FULL_DEMO )
         {
-            console_print( "Starting full demo\n" );
+            printf( "Starting full demo\n" );
             main_full();
         }
     #else
@@ -341,26 +330,6 @@ void vAssertCalled( const char * const pcFileName,
 static void prvSaveTraceFile( void )
 {
     /* Tracing is not used when code coverage analysis is being performed. */
-    #if ( projCOVERAGE_TEST != 1 )
-        {
-            FILE * pxOutputFile;
-
-            vTraceStop();
-
-            pxOutputFile = fopen( "Trace.dump", "wb" );
-
-            if( pxOutputFile != NULL )
-            {
-                fwrite( RecorderDataPtr, sizeof( RecorderDataType ), 1, pxOutputFile );
-                fclose( pxOutputFile );
-                printf( "\r\nTrace output saved to Trace.dump\r\n" );
-            }
-            else
-            {
-                printf( "\r\nFailed to create trace dump file\r\n" );
-            }
-        }
-    #endif /* if ( projCOVERAGE_TEST != 1 ) */
 }
 /*-----------------------------------------------------------*/
 
