@@ -123,11 +123,11 @@ def main():
     #    config.get_headers_dir()
     #)
 
-    (_, _, _, internal_prototypes, internal_code) = parse_code.parse(
+    (macro_vals_internal, _, _, internal_prototypes, internal_code) = parse_code.parse(
         config.get_internal_dir()
     )
 
-    #ffibuilder.embedding_api(concat_sources([prototypes]))
+    ffibuilder.embedding_api(concat_sources([macro_vals_internal]))
     ffibuilder.set_source(
         config.get_lib_name(),
         concat_sources([internal_code]),

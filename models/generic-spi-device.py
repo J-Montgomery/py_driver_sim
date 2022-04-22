@@ -1,4 +1,4 @@
-from model import ffi
+from libharness import ffi
 
 class GenericSpiDevice(DeviceClass):
     @register_probe('pysim,generic-device')
