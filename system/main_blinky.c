@@ -90,7 +90,7 @@
 #include "semphr.h"
 
 /* Local includes. */
-//#include "console.h"
+#include "calls.h"
 
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY    ( tskIDLE_PRIORITY + 2 )
@@ -251,15 +251,15 @@ static void prvQueueReceiveTask( void * pvParameters )
          * console output) from a FreeRTOS task. */
         if( ulReceivedValue == mainVALUE_SENT_FROM_TASK )
         {
-            printf( "Message received from task\n" );
+            uart_write( "Message received from task\n", 0);
         }
         else if( ulReceivedValue == mainVALUE_SENT_FROM_TIMER )
         {
-            printf( "Message received from software timer\n" );
+            uart_write( "Message received from software timer\n", 0);
         }
         else
         {
-            printf( "Unexpected message\n" );
+            uart_write( "Unexpected message\n", 0);
         }
     }
 }

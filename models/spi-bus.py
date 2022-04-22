@@ -1,4 +1,4 @@
-from model import ffi
+from libharness import ffi
 
 class SpiBus(DeviceClass):
     @register_probe('pysim,spi-bus')

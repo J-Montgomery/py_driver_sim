@@ -63,6 +63,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* internal calls */
+#include "calls.h"
+#include "lib.h"
+
 /* Local includes. */
 //#include "console.h"
 
@@ -146,6 +150,9 @@ int main( void )
 {
     /* SIGINT is not blocked by the posix port */
     signal( SIGINT, handle_sigint );
+
+    uart_write("Hello, World!\n", 14);
+    printf("python %i\n", call_stub(2, 3));
 
     #if ( mainSELECTED_APPLICATION == BLINKY_DEMO )
         {

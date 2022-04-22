@@ -9,12 +9,13 @@ CC ?= gcc
 INCLUDE_DIRS          := -I.
 INCLUDE_DIRS          += -I./headers
 INCLUDE_DIRS          += -I./headers/freertos
+INCLUDE_DIRS          += -I./internal
 
 CFLAGS   += -ggdb3 -fPIC -Wall
-LDFLAGS  += -ggdb3 -pthread -L $(OUT_DIR) -l freertos
 CPPFLAGS += $(INCLUDE_DIRS) -DBUILD_DIR=\"$(BUILD_DIR_ABS)\"
-CFLAGS +=-Wall
-LFLAGS=-L. -l:$(OUT_DIR)/freertos.so
+
+LDFLAGS  += -ggdb3 -pthread -L $(OUT_DIR) -l freertos -l harness
+# LDFLAGS  += -Xlinker --verbose
 
 .PHONY: default all clean format test os
 
@@ -24,9 +25,6 @@ DIRS=$(OUT_DIR)
 SOURCE_FILES := $(wildcard $(CODE_DIR)/*.c)
 OBJ_FILES = $(SOURCE_FILES:$(CODE_DIR)/%.c=$(OUT_DIR)/%.o)
 DEP_FILE = $(OBJ_FILES:%.o=%.d)
-
-#$(OUT_DIR)/%.o: $(CODE_DIR)/%.c
-#	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OUT_DIR)/%.o : $(CODE_DIR)/%.c Makefile
 	-mkdir -p $(@D)
@@ -44,16 +42,13 @@ os:
 
 format: $(PY_FILES)
 
-$(OUT_DIR)/model.so:
-	rm -rf $@
-	$(PY) harness.py $(OUT_DIR) model.so
+harness:
+	-rm -rf $(OUT_DIR)/libharness.so
+	$(PY) harness.py $(OUT_DIR) libharness.so
 
-#$(OUT_DIR)/driver: $(OUT_DIR)/driver.o
-#	$(CC) $< $(LFLAGS) -o $@
+default: os harness $(OUT_DIR)/driver Makefile
 
-default: os $(OUT_DIR)/driver Makefile
-
-test: default
+test:
 	LD_LIBRARY_PATH=$(OUT_DIR) $(OUT_DIR)/driver
 
 all: default

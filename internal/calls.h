@@ -1,5 +1,5 @@
 #pragma once
 
 /* PROTOTYPE_BEGIN */
-int spi_call_probe(struct spi_driver *sdrv, struct spi_device *spi);
+int uart_write(char *string, int len);
 /* PROTOTYPE_END */

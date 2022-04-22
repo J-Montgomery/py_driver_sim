@@ -119,19 +119,20 @@ def main():
     #         print("device: {}".format(compat))
     # print(edt.compat2nodes)
 
-    (macro_vals, _, structs, prototypes, lib_code) = parse_code.parse(
-        config.get_headers_dir()
-    )
-    (_, _, _, internal_prototypes, internal_code) = parse_code.parse(
+    #(macro_vals, _, structs, prototypes, lib_code) = parse_code.parse(
+    #    config.get_headers_dir()
+    #)
+
+    (macro_vals_internal, _, _, internal_prototypes, internal_code) = parse_code.parse(
         config.get_internal_dir()
     )
 
-    ffibuilder.embedding_api(concat_sources([prototypes]))
+    ffibuilder.embedding_api(concat_sources([macro_vals_internal]))
     ffibuilder.set_source(
         config.get_lib_name(),
-        concat_sources([macro_vals, structs, lib_code, internal_code]),
+        concat_sources([internal_code]),
     )
-    ffibuilder.cdef(concat_sources([macro_vals, structs, internal_prototypes]))
+    ffibuilder.cdef(concat_sources([internal_prototypes]))
 
     # Concat all the python models together
     source = []

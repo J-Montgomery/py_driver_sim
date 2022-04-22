@@ -1,4 +1,4 @@
-from model import ffi, lib
+from libharness import ffi, lib
 import sys
 
 #from models.utility import device_class
@@ -31,29 +31,29 @@ def call_stub(x, y):
     print("stub({0}, {1})".format(x, y))
     return x + y
 
-@ffi.def_extern()
-def spi_register_driver(sdrv):
-    driver = cdata_dict(sdrv[0])
-    print("register_driver", sdrv, driver["id_table"])
-    drv = find_device_table(driver["id_table"])
-    driver_table[drv] = sdrv
-    return 0
+# @ffi.def_extern()
+# def spi_register_driver(sdrv):
+#     driver = cdata_dict(sdrv[0])
+#     print("register_driver", sdrv, driver["id_table"])
+#     drv = find_device_table(driver["id_table"])
+#     driver_table[drv] = sdrv
+#     return 0
 
-@ffi.def_extern()
-def spi_unregister_driver(sdrv):
-    print("unregister_driver", sdrv)
+# @ffi.def_extern()
+# def spi_unregister_driver(sdrv):
+#     print("unregister_driver", sdrv)
 
 
-@ffi.def_extern()
-def initialize_device_table(type, name, dev_name, dev_id):
-    key = get_string(name)
-    dev_entry = [get_string(dev_name), dev_id]
-    if key in device_table:
-        device_table[key].append(dev_entry)
-    else:
-        device_table[key] = [dev_entry]
-    print("Init device table ({} : {}".format(key, dev_entry))
-    print(device_table)
+# @ffi.def_extern()
+# def initialize_device_table(type, name, dev_name, dev_id):
+#     key = get_string(name)
+#     dev_entry = [get_string(dev_name), dev_id]
+#     if key in device_table:
+#         device_table[key].append(dev_entry)
+#     else:
+#         device_table[key] = [dev_entry]
+#     print("Init device table ({} : {}".format(key, dev_entry))
+#     print(device_table)
 
 def parse_dt(path):
     edt = EDT(path, '')
@@ -68,30 +68,30 @@ def parse_dt(path):
     #print(edt.compat2nodes)
     return edt.compat2nodes
 
-@ffi.def_extern()
-def main(argv, argc):
-    global_mem_pool = []
-    dt_nodes = parse_dt("test_setup.dts")
+# @ffi.def_extern()
+# def main(argv, argc):
+#     global_mem_pool = []
+#     dt_nodes = parse_dt("test_setup.dts")
 
-    # Initialize our simulated devices
-    p = DeviceClass()
-    p.get_subclasses()
-    #print(_dev_id_registry)
+#     # Initialize our simulated devices
+#     p = DeviceClass()
+#     p.get_subclasses()
+#     #print(_dev_id_registry)
 
-    p.build_id_table()
+#     p.build_id_table()
 
-    # traverse the device-tree and initialize our simulated devices
-    for id in dt_nodes:
-        p.call_sim_probe(id)
+#     # traverse the device-tree and initialize our simulated devices
+#     for id in dt_nodes:
+#         p.call_sim_probe(id)
 
-    print("Starting execution\n----------------------------------------")
-    if not len(driver_table):
-        print("No drivers found")
-    else:
-        drivers = [driver_table[x] for x in driver_table]
-        #print("driver ", drivers)
-        # attempt to probe the first driver
-        mem = ffi.new("struct spi_device *")
-        global_mem_pool.append(mem)
-        lib.spi_call_probe(drivers[0], mem)
-    return 0
+#     print("Starting execution\n----------------------------------------")
+#     if not len(driver_table):
+#         print("No drivers found")
+#     else:
+#         drivers = [driver_table[x] for x in driver_table]
+#         #print("driver ", drivers)
+#         # attempt to probe the first driver
+#         mem = ffi.new("struct spi_device *")
+#         global_mem_pool.append(mem)
+#         lib.spi_call_probe(drivers[0], mem)
+#     return 0
