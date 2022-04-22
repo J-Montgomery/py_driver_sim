@@ -1,6 +1,7 @@
 /* CODE_BEGIN */
-int spi_call_probe(struct spi_driver *sdrv, struct spi_device *spi)
+int uart_write(char *string, int len)
 {
-	return sdrv->probe(spi);
+	printf("UART: %s", string);
+	return 0;
 }
 /* CODE_END */
