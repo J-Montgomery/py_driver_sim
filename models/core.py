@@ -1,12 +1,11 @@
 from libharness import ffi, lib
 import sys
 
-#from models.utility import device_class
-
 ResourceLoader(RESOURCE_STRING)
 from edtlib import EDT
 import json
 import argparse
+import time
 
 
 def get_string(cdata):
@@ -97,6 +96,12 @@ def harness_main(argc, argv):
     # Initialize the zeromq server
     message_broker = ZmqMessageBus(g_test_config['router_uri'], g_test_config['dealer_uri'])
     message_broker.start()
+
+    rep = ZmqRep(g_test_config['dealer_uri'])
+    rep.start()
+
+    req = ZmqReq(g_test_config['router_uri'])
+    req.send("Hello, World!")
 
     # Initialize the core message broker for the system
     # Initialize the root device class, which will initialize
