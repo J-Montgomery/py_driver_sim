@@ -1,3 +1,4 @@
 {
-    "mq_uri": "tcp://*:5559"
+    "router_uri": "tcp://*:5558",
+    "dealer_uri": "tcp://*:5559"
 }

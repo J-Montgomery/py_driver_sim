@@ -5,7 +5,6 @@ import sys
 
 ResourceLoader(RESOURCE_STRING)
 from edtlib import EDT
-import zmq
 import json
 import argparse
 
@@ -93,13 +92,16 @@ def harness_main(argc, argv):
     status = parse_args(args)
     if status:
         return status
-    
-    # Initialize the zeromq server
-    # foo()
-    # Initialize the core message broker for the system
 
+    print(g_test_config)
+    # Initialize the zeromq server
+    message_broker = ZmqMessageBus(g_test_config['router_uri'], g_test_config['dealer_uri'])
+    message_broker.start()
+
+    # Initialize the core message broker for the system
     # Initialize the root device class, which will initialize
     #   child devices in turn
+    return 0
 
 # @ffi.def_extern()
 # def main(argv, argc):
