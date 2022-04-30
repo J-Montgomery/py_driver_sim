@@ -5,6 +5,9 @@ import sys
 
 ResourceLoader(RESOURCE_STRING)
 from edtlib import EDT
+import zmq
+import json
+import argparse
 
 
 def get_string(cdata):
@@ -13,6 +16,7 @@ def get_string(cdata):
 
 device_table = dict()
 driver_table = dict()
+g_test_config = None
 
 
 def find_device_table(entry):
@@ -67,6 +71,35 @@ def parse_dt(path):
             print("device: {}".format(compat))
     #print(edt.compat2nodes)
     return edt.compat2nodes
+
+def parse_args(argv):
+    parser = argparse.ArgumentParser(description="Parahosted test executable")
+    parser.add_argument('config', help="Test config json")
+    try:
+        args = parser.parse_args(argv)
+    except:
+        return 1
+    print(args)
+    with open(args.config) as config:
+        global g_test_config
+        g_test_config = json.load(config)
+
+    return 0
+
+@ffi.def_extern()
+def harness_main(argc, argv):
+    args = [ffi.string(argv[x]).decode('utf-8') for x in range(1, argc)]
+
+    status = parse_args(args)
+    if status:
+        return status
+    
+    # Initialize the zeromq server
+    # foo()
+    # Initialize the core message broker for the system
+
+    # Initialize the root device class, which will initialize
+    #   child devices in turn
 
 # @ffi.def_extern()
 # def main(argv, argc):

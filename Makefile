@@ -49,7 +49,7 @@ harness:
 default: os harness $(OUT_DIR)/driver Makefile
 
 test:
-	LD_LIBRARY_PATH=$(OUT_DIR) $(OUT_DIR)/driver
+	LD_LIBRARY_PATH=$(OUT_DIR) $(OUT_DIR)/driver test_config.json
 
 all: default
 
