@@ -8,6 +8,15 @@ Python models must be added manually to the folder specified by the `models_dir`
 property in `config.json`. These models are concatenated together to generate
 the runtime.
 
+To build, use `make all`. To run, use `make test`.
+
+# Dependencies
+
+* Make
+* GCC or Clang
+* Python >= 3.6
+* [requirements.txt](requirements.txt)
+
 # FAQ / Why use this?
 
 * Why not write a virtual device for QEMU and run the driver in that?
