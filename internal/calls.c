@@ -4,11 +4,11 @@
 /* INCLUDE_END */
 
 /* CODE_BEGIN */
-int uart_write(char *string, int len)
-{
-	printf("UART: %s", string);
-	return 0;
-}
+// int uart_write(char *string, int len)
+// {
+// 	printf("UART: %s", string);
+// 	return 0;
+// }
 
 
 __attribute__((constructor)) int init(int argc, char **argv, char **envp)

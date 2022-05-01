@@ -97,3 +97,13 @@ class DeviceClass:
                     print("found!", dev_id)
                     sim_probe[1](dev_id)
         return [] # Couldn't find a simulated device
+
+class ObjectRegistry:
+    subsystems = dict() # Mapping subsystem name + function name -> object
+    def bind(self, sub, name, object):
+        if sub not in self.subsystems:
+            self.subsystems[sub] = dict()
+        self.subsystems[sub][name] = object
+
+    def get(self, sub, name):
+        return self.subsystems[sub][name]

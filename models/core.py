@@ -15,6 +15,7 @@ def get_string(cdata):
 device_table = dict()
 driver_table = dict()
 g_test_config = None
+g_object_registry = ObjectRegistry()
 
 
 def find_device_table(entry):
@@ -27,11 +28,20 @@ def find_device_table(entry):
                 print("found!", entry, dev, driver)
                 return driver
 
+def ffi_str(s):
+    return ffi.string(s).decode('utf-8')
 
 @ffi.def_extern()
 def call_stub(x, y):
     print("stub({0}, {1})".format(x, y))
     return x + y
+
+@ffi.def_extern()
+def uart_write(msg, len):
+    handler = g_object_registry.get("uart", "uart_write")
+    print("UART: {}".format(ffi_str(msg)))
+    print(handler(ffi_str(msg)))
+    return len
 
 # @ffi.def_extern()
 # def spi_register_driver(sdrv):
@@ -86,7 +96,7 @@ def parse_args(argv):
 
 @ffi.def_extern()
 def harness_main(argc, argv):
-    args = [ffi.string(argv[x]).decode('utf-8') for x in range(1, argc)]
+    args = [ffi_str(argv[x]) for x in range(1, argc)]
 
     status = parse_args(args)
     if status:
@@ -102,6 +112,8 @@ def harness_main(argc, argv):
 
     req = ZmqReq(g_test_config['router_uri'])
     req.send("Hello, World!")
+
+    g_object_registry.bind("uart", "uart_write", req.send)
 
     # Initialize the core message broker for the system
     # Initialize the root device class, which will initialize
