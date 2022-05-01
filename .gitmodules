@@ -1,0 +1,3 @@
+[submodule "majortomo"]
+	path = majortomo
+	url = git@github.com:J-Montgomery/majortomo.git
