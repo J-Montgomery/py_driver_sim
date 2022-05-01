@@ -1,15 +1,10 @@
 /* INCLUDE_BEGIN */
 #include <stdlib.h>
-#include "lib.h"
+#include "parahost.h"
 /* INCLUDE_END */
 
 /* CODE_BEGIN */
-// int uart_write(char *string, int len)
-// {
-// 	printf("UART: %s", string);
-// 	return 0;
-// }
-
+extern int harness_main(int argc, char *argv[]);
 
 __attribute__((constructor)) int init(int argc, char **argv, char **envp)
 {

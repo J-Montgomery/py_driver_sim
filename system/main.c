@@ -64,11 +64,7 @@
 #include "task.h"
 
 /* internal calls */
-#include "calls.h"
-#include "lib.h"
-
-/* Local includes. */
-//#include "console.h"
+#include "parahost.h"
 
 #define    BLINKY_DEMO    0
 #define    FULL_DEMO      1

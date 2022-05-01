@@ -85,4 +85,6 @@ class ZmqReq:
     def send(self, message):
         print(f"sending req {message}")
         self.socket.send_string(message)
-        print("receiving req {}".format(self.socket.recv()))
+        rsp = self.socket.recv()
+        print("receiving req {}".format(rsp))
+        return rsp
