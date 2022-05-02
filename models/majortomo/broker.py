@@ -28,6 +28,7 @@ class Broker(Thread):
         super().__init__()
         # type: (str, float, float, float, Optional[zmq.Context]) -> None
         self._log = logging.getLogger("broker")
+        self._log.setLevel(10)
         self._bind_url = bind
         self._heartbeat_interval = heartbeat_interval
         self._heartbeat_timeout = heartbeat_timeout

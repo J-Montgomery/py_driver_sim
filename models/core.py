@@ -7,6 +7,8 @@ import json
 import argparse
 import time
 
+import logging
+
 g_test_config = None
 g_object_registry = ObjectRegistry()
 
@@ -20,9 +22,11 @@ def call_stub(x, y):
 
 @ffi.def_extern()
 def uart_write(msg, len):
-    #handler = g_object_registry.get("uart", "uart_write")
+    handler = g_object_registry.get(b"uart", "uart_write")
     print("UART: {}".format(ffi_str(msg)))
-    #print(handler("UART", ffi_str(msg)))
+    print(handler.send(b'uart', ffi_str(msg).encode('utf-8')))
+    response = handler.recv_all_as_list(timeout=10)
+    print(response)
     return len
 
 def parse_dt(path):
@@ -52,6 +56,16 @@ def parse_args(argv):
 
     return 0
 
+def init_logger():
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+
 @ffi.def_extern()
 def harness_main(argc, argv):
     args = [ffi_str(argv[x]) for x in range(1, argc)]
@@ -61,6 +75,7 @@ def harness_main(argc, argv):
         return status
 
     print(g_test_config)
+    init_logger()
     # Initialize the zeromq server
     # message_broker = ZmqMessageBus(g_test_config['router_uri'], g_test_config['dealer_uri'])
     # message_broker.start()
@@ -73,16 +88,19 @@ def harness_main(argc, argv):
     broker = Broker(g_test_config['router_uri'])
     broker.start()
 
-    worker = Worker(g_test_config['router_uri'], b'car')
+    worker = Worker(g_test_config['router_uri'], b'uart')
     worker.connect()
-    worker.start()
+
+    task = WorkerTask(worker)
+    task.start()
 
     client = Client(g_test_config['router_uri'])
     client.connect()
-    client.send(b'car', b"Hello, World!")
-    response = client.recv_all_as_list(timeout=1)
+    client.send(b'uart', b"Hello, World!")
 
-    #g_object_registry.bind("uart", "uart_write", client.send)
+    response = client.recv_all_as_list(timeout=10)
+
+    g_object_registry.bind(b"uart", "uart_write", client)
 
     # Initialize the core message broker for the system
     # Initialize the root device class, which will initialize

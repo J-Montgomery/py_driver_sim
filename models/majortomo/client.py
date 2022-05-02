@@ -146,7 +146,7 @@ class Client(object):
             raise ProtocolError("Unexpected message length, expecting at least 3 frames, got {}".format(
                 len(message)))
 
-        if messagpop(0) != b'':
+        if message.pop(0) != b'':
             raise ProtocolError("Expecting first message frame to be empty")
 
         if message[0] != CLIENT_HEADER:

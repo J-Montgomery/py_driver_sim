@@ -22,6 +22,7 @@ from typing import Generator, Iterable, List, Optional, Tuple  # noqa: F401
 
 import zmq
 from threading import Thread
+import binascii
 #from majortomo import error
 #from majortomo import protocol as p
 #from majortomo.util import TextOrBytes, text_to_ascii_bytes
@@ -29,14 +30,13 @@ from threading import Thread
 DEFAULT_ZMQ_LINGER = 2500
 
 
-class Worker(Thread):
+class Worker():
     """MDP 0.2 Worker implementation
     """
 
     def __init__(self, broker_url, service_name, heartbeat_interval=DEFAULT_HEARTBEAT_INTERVAL,
                  heartbeat_timeout=DEFAULT_HEARTBEAT_TIMEOUT, zmq_context=None, zmq_linger=DEFAULT_ZMQ_LINGER):
         # type: (str, TextOrBytes, float, float, Optional[zmq.Context], int) -> None
-        super().__init__()
         self.broker_url = broker_url
         self.service_name = service_name
         self.heartbeat_interval = heartbeat_interval
@@ -49,11 +49,6 @@ class Worker(Thread):
         self._heartbeat_timeout = heartbeat_timeout
         self._last_broker_hb = 0.0
         self._last_sent_message = 0.0
-
-    def run(self):
-        socket_thread = Thread(target=self._receive)
-        socket_thread.start()
-        socket_thread.join() #
 
     def connect(self, reconnect=False):
         # type: (bool) -> None
@@ -170,6 +165,7 @@ class Worker(Thread):
             if socks.get(self._socket) == zmq.POLLIN:
                 message = self._socket.recv_multipart()
                 self._log.debug("Got message of %d frames", len(message))
+                print(message[-1].decode('utf-8'))
             else:
                 self._log.debug("Receive timed out after %d ms", poll_timeout)
                 if (time.time() - self._last_broker_hb) > self._heartbeat_timeout:
@@ -242,24 +238,29 @@ class Worker(Thread):
         self.close()
 
 
-class WorkerRequestsIterator(object):
+class WorkerTask(Thread):
     """An iterator that allows simple, high-level API over workers
     """
 
     def __init__(self, worker):
+        super().__init__()
         # type: (Worker) -> None
         self.worker = worker
         self._last_client = None  # type: Optional[bytes]
-        self._log = logging.getLogger("workerrequestsiterator")
+        self._log = logging.getLogger("WorkerWrapper")
         self._stop = False
 
-    def __iter__(self):
+    def respond(self, request):
+        return request
+
+    def wait(self):
         # type: () -> Generator[List[bytes], None, None]
         with self.worker:
             while not self._stop:
                 try:
                     self._last_client, request = self.worker.wait_for_request()
-                    yield request
+                    reply = self.respond(request)
+                    self.send_reply_final(reply)
 
                 except ProtocolError as e:
                     self._log.warning("Protocol error: %s, dropping request", str(e))
@@ -268,6 +269,11 @@ class WorkerRequestsIterator(object):
                 except Disconnected:
                     self._log.info("Worker disconnected")
                     break
+
+    def run(self):
+        socket_thread = Thread(target=self.wait)
+        socket_thread.start()
+        socket_thread.join()
 
     def stop(self):
         self.worker.close()

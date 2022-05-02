@@ -30,7 +30,7 @@ default_config = {
             'console': {
                 'class': 'logging.StreamHandler',
                 'level': 'INFO',
-                'stream': 'ext://sys.stderr',
+                'stream': 'ext://sys.stdout',
                 'formatter': 'default',
                 'filters': [],
             }
