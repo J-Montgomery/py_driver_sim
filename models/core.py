@@ -6,6 +6,7 @@ from edtlib import EDT
 import json
 import argparse
 import time
+import logging
 
 g_test_config = None
 g_object_registry = ObjectRegistry()
@@ -21,7 +22,7 @@ def call_stub(x, y):
 @ffi.def_extern()
 def uart_write(msg, len):
     server = g_object_registry.get("ioserver", "")
-    print("UART: {}".format(ffi_str(msg)))
+    #print("UART: {}".format(ffi_str(msg)))
     server.send('peripheral.uart.write', ffi_str(msg))
     return len
 
@@ -52,9 +53,20 @@ def parse_args(argv):
 
     return 0
 
+def init_stdout_logger():
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+
 @ffi.def_extern()
 def harness_main(argc, argv):
     args = [ffi_str(argv[x]) for x in range(1, argc)]
+
+    init_stdout_logger()
 
     status = parse_args(args)
     if status:
@@ -71,12 +83,12 @@ def harness_main(argc, argv):
     # req = ZmqReq(g_test_config['router_uri'])
     # req.send("Hello, World!")
 
-    io_server = IOServer(g_test_config['router_uri'], g_test_config['dealer_uri'])
+    io_server = ZmqBackend(g_test_config['router_uri'], g_test_config['dealer_uri'])
     uart = UartServer(io_server)
 
     io_server.start()
     time.sleep(1)
-    io_msg = IOMessenger(g_test_config['router_uri'])
+    io_msg = ZmqFrontend(g_test_config['router_uri'])
     io_msg.send('peripheral.uart.write', "test")
 
     g_object_registry.bind("ioserver1", "", io_server)

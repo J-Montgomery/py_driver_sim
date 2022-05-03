@@ -7,8 +7,9 @@ import zmq
 class UartServer(object):
     def __init__(self, ioserver):
         self.ioserver = ioserver
+        self.log = logging.getLogger('UartServer')
         ioserver.register_topic('peripheral.uart.write', self.write_handler)
 
     def write_handler(self, ioserver, msg):
-        print('uart write: \'{}\''.format(msg))
+        self.log.debug('uart write: \'{}\''.format(msg))
         return

@@ -2,6 +2,7 @@ from libharness import ffi
 from threading import Thread
 import zmq
 import json
+import logging
 
 # [ REQ ]  [ REQ ] [ REQ ]
 #    |        |       |
@@ -100,7 +101,7 @@ class ZmqReq:
         return rsp
 
 
-class IOServer(Thread):
+class ZmqBackend(Thread):
     def __init__(self, rx_uri, tx_uri):
         super().__init__()
         self.rx_uri = rx_uri
@@ -112,14 +113,15 @@ class IOServer(Thread):
 
         self.tx_socket = self.context.socket(zmq.PUB)
         self.tx_socket.connect(self.tx_uri)
+        self.log = logging.getLogger('ZmqBackend')
 
         self.handlers = {}
-        print("sockets {} {}", self.rx_uri, self.tx_uri)
+        self.log.debug("sockets {} {}".format(self.rx_uri, self.tx_uri))
 
     def register_topic(self, topic, handler):
-        print("Registering RX_Port: %s, Topic: %s" % (self.rx_uri, topic))
+        #self.log.info("Registering RX_Port: %s, Topic: %s" % (self.rx_uri, topic))
         topic_string = '{"topic": "' + topic + '",'
-        #print("topic [{}]".format(topic_string))
+        self.log.debug("topic [{}]".format(topic_string))
         self.rx_socket.setsockopt_string(zmq.SUBSCRIBE, topic_string)
         self.handlers[topic] = handler
 
@@ -129,29 +131,26 @@ class IOServer(Thread):
         socket_thread.join() # unreachable
 
     def socket_poll(self):
-        print("socket poll")
         self.poller = zmq.Poller()
         self.poller.register(self.rx_socket, zmq.POLLIN)
-        print("socket poll2")
         while True:
-            print("socket poll3")
             sockets = dict(self.poller.poll(1000))
-            print("run ", sockets)
             if sockets.get(self.rx_socket) == zmq.POLLIN:
                 msg = self.rx_socket.recv()
                 topic, data = decode_message(msg)
-                print("IOServer received {} {}".format(topic, data))
+                self.log.debug("IOServer received {} {}".format(topic, data))
                 handler = self.handlers[topic]
                 handler(self, data)
 
 
-class IOMessenger(object):
+class ZmqFrontend(object):
     def __init__(self, tx_uri):
         self.tx_uri = tx_uri
         self.context = zmq.Context()
         self.tx_socket = self.context.socket(zmq.PUB)
-        print("binding ", self.tx_socket.bind(tx_uri))
+        self.log = logging.getLogger('ZmqFrontend')
+        self.log.info("binding ".format(self.tx_socket.bind(tx_uri)))
 
     def send(self, topic, msg):
-        print("sending to", self.tx_uri, encode_message(topic, msg))
+        self.log.debug("sending to".format(self.tx_uri, encode_message(topic, msg)))
         self.tx_socket.send_string(encode_message(topic, msg))
