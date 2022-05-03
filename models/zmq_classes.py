@@ -68,7 +68,8 @@ class ZmqBackend(Thread):
 
 
 class ZmqFrontend(object):
-    def __init__(self, tx_uri):
+    def __init__(self, rx_uri, tx_uri):
+        self.rx_uri = rx_uri
         self.tx_uri = tx_uri
         self.context = zmq.Context()
         self.tx_socket = self.context.socket(zmq.PUB)

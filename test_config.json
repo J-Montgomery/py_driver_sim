@@ -1,4 +1,4 @@
 {
-    "router_uri": "tcp://127.0.0.1:5558",
-    "dealer_uri": "tcp://127.0.0.1:5559"
+    "backend_uri": "tcp://127.0.0.1:5558",
+    "frontend_uri": "tcp://127.0.0.1:5559"
 }

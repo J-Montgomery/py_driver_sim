@@ -76,11 +76,14 @@ def harness_main(argc, argv):
     print(g_test_config)
 
     # Initialize the zeromq server
-    backend = ZmqBackend(g_test_config['router_uri'], g_test_config['dealer_uri'])
+    backend_uri = g_test_config['backend_uri']
+    frontend_uri = g_test_config['frontend_uri']
+
+    backend = ZmqBackend(backend_uri, frontend_uri)
     uart = UartServer(backend)
     backend.start()
 
-    frontend = ZmqFrontend(g_test_config['router_uri'])
+    frontend = ZmqFrontend(frontend_uri, backend_uri)
     frontend.send('peripheral.uart.write', "test")
 
     g_object_registry.bind("frontend", frontend)
