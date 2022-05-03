@@ -54,10 +54,10 @@ def cdata_dict(cd):
 
 class ObjectRegistry:
     subsystems = dict() # Mapping subsystem name + function name -> object
-    def bind(self, sub, name, object):
+    def bind(self, sub, object):
         if sub not in self.subsystems:
             self.subsystems[sub] = dict()
-        self.subsystems[sub][name] = object
+        self.subsystems[sub] = object
 
-    def get(self, sub, name):
-        return self.subsystems[sub][name]
+    def get(self, sub):
+        return self.subsystems[sub]

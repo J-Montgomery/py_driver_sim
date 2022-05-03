@@ -11,5 +11,5 @@ class UartServer(object):
         ioserver.register_topic('peripheral.uart.write', self.write_handler)
 
     def write_handler(self, ioserver, msg):
-        self.log.debug('uart write: \'{}\''.format(msg))
+        self.log.info('uart write: \'{}\''.format(msg))
         return

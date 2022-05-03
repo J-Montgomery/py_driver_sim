@@ -21,7 +21,7 @@ def call_stub(x, y):
 
 @ffi.def_extern()
 def uart_write(msg, len):
-    server = g_object_registry.get("ioserver", "")
+    server = g_object_registry.get("frontend")
     #print("UART: {}".format(ffi_str(msg)))
     server.send('peripheral.uart.write', ffi_str(msg))
     return len
@@ -54,10 +54,11 @@ def parse_args(argv):
     return 0
 
 def init_stdout_logger():
+    loglevel = logging.INFO
     root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    root.setLevel(loglevel)
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(loglevel)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     root.addHandler(handler)
@@ -75,14 +76,14 @@ def harness_main(argc, argv):
     print(g_test_config)
 
     # Initialize the zeromq server
-    io_server = ZmqBackend(g_test_config['router_uri'], g_test_config['dealer_uri'])
-    uart = UartServer(io_server)
-    io_server.start()
+    backend = ZmqBackend(g_test_config['router_uri'], g_test_config['dealer_uri'])
+    uart = UartServer(backend)
+    backend.start()
 
-    io_msg = ZmqFrontend(g_test_config['router_uri'])
-    io_msg.send('peripheral.uart.write', "test")
+    frontend = ZmqFrontend(g_test_config['router_uri'])
+    frontend.send('peripheral.uart.write', "test")
 
-    g_object_registry.bind("ioserver", "", io_msg)
+    g_object_registry.bind("frontend", frontend)
 
     # Initialize the core message broker for the system
     # Initialize the root device class, which will initialize
