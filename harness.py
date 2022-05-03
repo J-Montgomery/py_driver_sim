@@ -64,7 +64,7 @@ class Config:
 
 def parse_config(filepath):
     config = None
-    with open("config.json", "r") as configfile:
+    with open("build_config.json", "r") as configfile:
         config = json.load(configfile)
     print(config["source_dir"])
 
@@ -106,7 +106,7 @@ def main():
 
     ffibuilder = cffi.FFI()
 
-    config = Config("config.json")
+    config = Config("build_config.json")
 
     # edt = edtlib.EDT(config.get_devicetree(), '')
 
