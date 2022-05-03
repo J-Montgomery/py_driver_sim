@@ -20,9 +20,9 @@ def call_stub(x, y):
 
 @ffi.def_extern()
 def uart_write(msg, len):
-    handler = g_object_registry.get("uart", "uart_write")
+    server = g_object_registry.get("ioserver", "")
     print("UART: {}".format(ffi_str(msg)))
-    print(handler(ffi_str(msg)))
+    server.send('peripheral.uart.write', ffi_str(msg))
     return len
 
 def parse_dt(path):
@@ -62,16 +62,25 @@ def harness_main(argc, argv):
 
     print(g_test_config)
     # Initialize the zeromq server
-    message_broker = ZmqMessageBus(g_test_config['router_uri'], g_test_config['dealer_uri'])
-    message_broker.start()
+    # message_broker = ZmqMessageBus(g_test_config['router_uri'], g_test_config['dealer_uri'])
+    # message_broker.start()
 
-    rep = ZmqRep(g_test_config['dealer_uri'])
-    rep.start()
+    # rep = ZmqRep(g_test_config['dealer_uri'])
+    # rep.start()
 
-    req = ZmqReq(g_test_config['router_uri'])
-    req.send("Hello, World!")
+    # req = ZmqReq(g_test_config['router_uri'])
+    # req.send("Hello, World!")
 
-    g_object_registry.bind("uart", "uart_write", req.send)
+    io_server = IOServer(g_test_config['router_uri'], g_test_config['dealer_uri'])
+    uart = UartServer(io_server)
+
+    io_server.start()
+    time.sleep(1)
+    io_msg = IOMessenger(g_test_config['router_uri'])
+    io_msg.send('peripheral.uart.write', "test")
+
+    g_object_registry.bind("ioserver1", "", io_server)
+    g_object_registry.bind("ioserver", "", io_msg)
 
     # Initialize the core message broker for the system
     # Initialize the root device class, which will initialize
