@@ -73,25 +73,15 @@ def harness_main(argc, argv):
         return status
 
     print(g_test_config)
+
     # Initialize the zeromq server
-    # message_broker = ZmqMessageBus(g_test_config['router_uri'], g_test_config['dealer_uri'])
-    # message_broker.start()
-
-    # rep = ZmqRep(g_test_config['dealer_uri'])
-    # rep.start()
-
-    # req = ZmqReq(g_test_config['router_uri'])
-    # req.send("Hello, World!")
-
     io_server = ZmqBackend(g_test_config['router_uri'], g_test_config['dealer_uri'])
     uart = UartServer(io_server)
-
     io_server.start()
-    time.sleep(1)
+
     io_msg = ZmqFrontend(g_test_config['router_uri'])
     io_msg.send('peripheral.uart.write', "test")
 
-    g_object_registry.bind("ioserver1", "", io_server)
     g_object_registry.bind("ioserver", "", io_msg)
 
     # Initialize the core message broker for the system
